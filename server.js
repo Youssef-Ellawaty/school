@@ -1,10 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { ParseServer } = require('parse-server');
 const { students, grades, attendance } = require('./data');
+const parseConfig = require('./parse-config');
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Initialize Parse Server
+const parseServer = new ParseServer(parseConfig);
+
+// Mount Parse Server
+app.use('/parse', parseServer);
 
 // Middleware
 app.use(cors());
