@@ -1878,8 +1878,20 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // Global data storage
-        let students = [
+        // إدارة البيانات في localStorage
+        const storage = {
+            saveData(key, data) {
+                localStorage.setItem(key, JSON.stringify(data));
+            },
+            
+            getData(key) {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            }
+        };
+
+        // تهيئة البيانات
+        let students = storage.getData('students') || [
             {
                 name: 'يوسف أحمد راضي التواتي',
                 nationalId: '30507012301234',
