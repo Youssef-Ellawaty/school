@@ -1,0 +1,3908 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة شؤون الطلاب</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --pink-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            --blue-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --purple-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --bg-dark: #1a1d29;
+            --card-dark: #2d3142;
+            --text-light: #ffffff;
+            --border-dark: #404654;
+            --shadow-dark: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e74c3c 0%, #8e44ad 50%, #3498db 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .nav-tabs {
+            background: linear-gradient(135deg, #2d3142 0%, #1a1d29 100%);
+            padding: 1rem 2rem;
+            margin: 2rem auto 0;
+            max-width: 1400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .nav-tabs::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #4facfe, #00f2fe, #4facfe);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-right: 2rem;
+        }
+
+        .nav-logo {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-title h3 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--text-light);
+            font-weight: bold;
+        }
+
+        .nav-title p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            font-style: italic;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            padding: 0.8rem 1.2rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 12px;
+            min-width: 100px;
+        }
+
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .nav-tab.active::before {
+            opacity: 1;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .nav-tab:hover::before {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3));
+        }
+
+        .nav-tab.active {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-tab:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .nav-tab.active .nav-tab-icon {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+        }
+
+        .nav-tab.active .nav-tab-text {
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-tab-icon {
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-tab:hover .nav-tab-icon {
+            transform: scale(1.2);
+        }
+
+        .nav-tab-text {
+            font-weight: 500;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: 2rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .user-avatar {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .grade-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .grade-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .grade-card:nth-child(2) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .grade-card:nth-child(3) {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .grade-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            transition: all 0.3s ease;
+        }
+
+        .grade-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .grade-card:hover::before {
+            top: -30%;
+            right: -30%;
+        }
+
+        .grade-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grade-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .grade-number {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .classes-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+            animation: slideDown 0.5s ease;
+        }
+
+        .classes-grid.active {
+            display: grid;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .class-card {
+            background: var(--card-dark);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .class-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--blue-gradient);
+            transition: all 0.3s ease;
+            z-index: -1;
+        }
+
+        .class-card:hover::before {
+            left: 0;
+        }
+
+        .class-card:hover {
+            color: white;
+            transform: scale(1.05);
+            border-color: transparent;
+        }
+
+        .class-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .class-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            padding: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--card-dark);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: var(--shadow-dark);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .stat-card-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card:nth-child(1) .stat-card-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card:nth-child(2) .stat-card-icon {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .stat-card:nth-child(3) .stat-card-icon {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+
+        .stat-card:nth-child(4) .stat-card-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .label {
+            font-size: 1rem;
+            opacity: 0.8;
+            color: white;
+        }
+
+        .controls {
+            background: var(--card-dark);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .controls-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: inherit;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn-primary {
+            background: var(--blue-gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-light);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-dark);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--card-dark);
+            color: var(--text-light);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-dark);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-dark);
+        }
+
+        .table th,
+        .table td {
+            padding: 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.01);
+        }
+
+        .student-name {
+            cursor: pointer;
+            color: #4facfe;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .student-name:hover {
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-dark);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-dark);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: #ff6b6b;
+            transform: scale(1.2);
+        }
+
+        .student-card {
+            background: var(--card-dark);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: var(--shadow-dark);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .student-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--blue-gradient);
+        }
+
+        .student-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-item {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .info-item h4 {
+            color: #4facfe;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item p {
+            color: var(--text-light);
+        }
+
+        .grades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .grade-item {
+            background: var(--card-dark);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--border-dark);
+        }
+
+        .grade-item.pass {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.1);
+        }
+
+        .grade-item.fail {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        .grade-item h5 {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .grade-item .grade {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .grade-item.pass .grade {
+            color: #4ecdc4;
+        }
+
+        .grade-item.fail .grade {
+            color: #ff6b6b;
+        }
+
+        .attendance-summary {
+            background: rgba(79, 172, 254, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .attendance-percentage {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 0.5rem;
+        }
+
+        .student-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .student-status.pass {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+        }
+
+        .student-status.fail {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .student-status.pending {
+            background: linear-gradient(135deg, #9aa5b1 0%, #6b7280 100%);
+            color: white;
+        }
+
+        /* Student Card Styles */
+        .student-card {
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .student-info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-section h4 {
+            color: #4facfe;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row .label {
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        /* grades UI removed from student card */
+
+        .semester-grades h5 {
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .grade-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #fff;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .student-info-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .card-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Student Link Styles */
+        .student-link {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .student-link:hover {
+            color: #00d4ff;
+            text-decoration: underline;
+        }
+
+        .failed-subjects { display: none; }
+
+        .failed-subjects h4 {
+            color: #ff6b6b;
+            margin-bottom: 0.5rem;
+        }
+
+        .notes-section {
+            margin: 2rem 0;
+        }
+
+        .notes-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            border: 2px solid var(--border-dark);
+            border-radius: 10px;
+            background: var(--card-dark);
+            color: var(--text-light);
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .notes-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .certificate-container {
+            width: 21cm;
+            height: 29.7cm;
+            margin: 0 auto;
+            background: white;
+            color: black;
+            padding: 2cm;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .certificate-quarter {
+            width: 100%;
+            height: auto;
+            border: 2px solid #333;
+            padding: 1.5rem 1.25rem 2rem; /* extend block slightly downward */
+            margin-bottom: 1.2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .certificate-header h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .certificate-header h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .certificate-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.35rem; /* tighter vertical spacing */
+        }
+
+        .certificate-row {
+            display: flex;
+            justify-content: flex-start; /* bring values closer to labels */
+            align-items: center;
+            margin-bottom: 0.4rem;
+            gap: 1rem; /* consistent small gap */
+            flex-wrap: wrap;
+        }
+
+        /* make label spans fixed width for consistent closeness */
+        .certificate-row span:first-child,
+        .certificate-row span:nth-child(3) {
+            min-width: 90px;
+            font-weight: 600;
+        }
+
+        .certificate-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            opacity: 0.6;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .report-section {
+            margin: 2rem 0;
+        }
+
+        .report-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-icon {
+            font-size: 2rem;
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .top-student {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-dark);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .top-student:hover {
+            transform: translateX(-5px);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .student-rank {
+            background: var(--blue-gradient);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .student-rank.gold {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-gradient);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-dark);
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--danger-gradient);
+        }
+
+        .toast.warning {
+            background: var(--warning-gradient);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .nav-tabs {
+                margin: 1rem auto 0;
+            }
+
+            .nav-tab {
+                min-width: 100px;
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+
+            .grade-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+
+            .student-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .grades-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+    <style media="print">
+        /* Print-only styles for attendance PDF */
+        body * { visibility: hidden; }
+        #attendance, #attendance * { visibility: visible; }
+        #attendance { position: absolute; left: 0; top: 0; width: 100%; }
+        /* Hide buttons in print */
+        .btn, .nav-tabs, .theme-toggle, .header { display: none !important; }
+        /* Improve table print readability */
+        .table { border: 1px solid #000; }
+        .table th, .table td { border: 1px solid #000 !important; color: #000 !important; }
+        .table th { background: #eee !important; }
+        .student-status { color: #000 !important; background: none !important; border: 1px solid #000; }
+    </style>
+</head>
+<body>
+    <div id="password-overlay" style="
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #1a1d29e0; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+    <div style="background: #2d3142; padding: 2rem 2.5rem; border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); text-align: center;">
+        <h2 style="color: #4facfe; margin-bottom: 1.5rem;">أدخل كلمة المرور للدخول</h2>
+        <input type="password" id="page-password" class="form-control" placeholder="كلمة المرور" style="margin-bottom: 1rem; font-size: 1.2rem;">
+        <button onclick="checkPassword()" class="btn btn-primary" style="width: 100%;">دخول</button>
+        <div id="password-error" style="color: #ff6b6b; margin-top: 1rem; display: none;">كلمة المرور غير صحيحة!</div>
+        </div>
+    </div>
+
+    <header class="header">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        <img src="logo1.png" alt="Logo" style="position: absolute; top: 0px; right: 0px; width: 160px; height: 160px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <h1>نظام إدارة شؤون طلاب</h1>
+        <p>مدرسة الشهيد حمدي إبراهيم الإعدادية بنين</p>
+    </header>
+
+    <nav class="nav-tabs">
+        <div class="nav-brand">
+            <div class="nav-logo">🎓</div>
+        </div>
+        <div class="nav-menu">
+            <button class="nav-tab active" onclick="showTab('dashboard')">
+                <span class="nav-tab-icon">🏠</span>
+                <span class="nav-tab-text">لوحة التحكم</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('students')">
+                <span class="nav-tab-icon">👥</span>
+                <span class="nav-tab-text">إدارة الطلاب</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('attendance')">
+                <span class="nav-tab-icon">📅</span>
+                <span class="nav-tab-text">الحضور</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('grades')">
+                <span class="nav-tab-icon">⭐</span>
+                <span class="nav-tab-text">الدرجات</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('reports')">
+                <span class="nav-tab-icon">📊</span>
+                <span class="nav-tab-text">التقارير</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('certificates')">
+                <span class="nav-tab-icon">🏆</span>
+                <span class="nav-tab-text">الإفادات</span>
+            </button>
+            <button class="nav-tab" onclick="showTab('settings')">
+                <span class="nav-tab-icon">⚙️</span>
+                <span class="nav-tab-text">الإعدادات</span>
+            </button>
+        </div>
+        <div class="nav-user">
+            <div class="user-info">
+                <span class="user-name">Youssef Ellawaty</span>
+                <span class="user-role">مطور النظام</span>
+            </div>
+            <div class="user-avatar">👨‍💻</div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="grade-cards">
+                <div class="grade-card" onclick="showClasses(1)">
+                    <h3>الصف الأول الإعدادي</h3>
+                    <div class="grade-number" id="grade1-count">1</div>
+                    <p>15 فصل دراسي</p>
+                    <p id="grade1-students">إجمالي الطلاب</p>
+                </div>
+                <div class="grade-card" onclick="showClasses(2)">
+                    <h3>الصف الثاني الإعدادي</h3>
+                    <div class="grade-number" id="grade2-count">0</div>
+                    <p>12 فصل دراسي</p>
+                    <p id="grade2-students">إجمالي الطلاب</p>
+                </div>
+                <div class="grade-card" onclick="showClasses(3)">
+                    <h3>الصف الثالث الإعدادي</h3>
+                    <div class="grade-number" id="grade3-count">0</div>
+                    <p>12 فصل دراسي</p>
+                    <p id="grade3-students">إجمالي الطلاب</p>
+                </div>
+            </div>
+
+            <div id="classes-section" style="display: none;">
+                <h2 style="text-align: center; margin: 2rem 0;">الفصول الدراسية</h2>
+                <div class="classes-grid" id="classes-grid"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-icon">👥</div>
+                    <div class="number" id="total-students">1</div>
+                    <div class="label">إجمالي الطلاب</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">❌</div>
+                    <div class="number" id="total-absent">0</div>
+                    <div class="label">الغياب اليوم</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">✅</div>
+                    <div class="number" id="total-present">1</div>
+                    <div class="label">الحضور اليوم</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">📊</div>
+                    <div class="number" id="attendance-percentage">100%</div>
+                    <div class="label">نسبة الحضور</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <div class="controls">
+                <div class="controls-row">
+                    <button class="btn btn-primary" onclick="showAddStudentModal()">
+                        ➕ إضافة طالب جديد
+                    </button>
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        📤 تصدير إلى Excel
+                    </button>
+                    <button class="btn btn-warning" onclick="document.getElementById('import-file').click()">
+                        📥 استيراد من Excel
+                    </button>
+                    <input type="file" id="import-file" accept=".xlsx,.xls" style="display: none;" onchange="importFromExcel(event)">
+                    <button class="btn btn-danger" onclick="deleteAllStudents()" style="margin-right: 1rem;">
+                        🗑️ حذف كل الطلاب
+                    </button>                    
+                </div>
+                <div class="controls-row">
+                    <select id="filter-grade" class="form-control" onchange="filterStudents()" style="max-width: 200px;">
+                        <option value="">جميع الصفوف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                    <select id="filter-class" class="form-control" onchange="filterStudents()" style="max-width: 200px;">
+                        <option value="">جميع الفصول</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الصف</th>
+                            <th>الفصل</th>
+                            <th>تاريخ الميلاد</th>
+                            <th>رقم ولي الأمر</th>
+                            <th>الرقم القومي</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        <tr>
+                            <td><span class="student-name" onclick="showStudentCard('يوسف أحمد راضي التواتي')">يوسف أحمد راضي التواتي</span></td>
+                            <td>الصف الأول الإعدادي</td>
+                            <td>فصل 1</td>
+                            <td>2009/7/1</td>
+                            <td>01005537722</td>
+                            <td><span class="student-status pass">ناجح</span></td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editStudent('يوسف أحمد راضي التواتي')" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                                    ✏️ تعديل
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="controls">
+                <div class="controls-row">
+                    <button class="btn btn-success" onclick="markAllPresent()">
+                        ✅ تسجيل الجميع حاضر
+                    </button>
+                    <button class="btn btn-danger" onclick="markAllAbsent()">
+                        ❌ تسجيل الجميع غائب
+                    </button>
+                    <button class="btn btn-warning" onclick="saveAttendance()">
+                        💾 حفظ الحضور
+                    </button>
+                    <input type="date" id="attendance-date" class="form-control" style="max-width: 200px;" onchange="loadAttendanceForDate()">
+                    <button class="btn btn-primary" onclick="printClassAttendance()">🖨️ طباعة PDF للفصل</button>
+                    <button class="btn btn-success" onclick="printAnnualClassAttendance()">🖨️ طباعة الغياب السنوي</button>
+                    <button class="btn btn-warning" onclick="exportAnnualAttendance()">📥 تصدير الغياب السنوي</button>
+                    <button class="btn btn-primary" onclick="downloadDailyAttendancePDF()">📥 تحميل PDF اليومي</button>
+                </div>
+                <div class="controls-row">
+                    <select id="attendance-grade" class="form-control" onchange="filterAttendance()" style="max-width: 200px;">
+                        <option value="">جميع الصفوف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                    <select id="attendance-class" class="form-control" onchange="filterAttendance()" style="max-width: 200px;">
+                        <option value="">جميع الفصول</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="recordAllAttendance()">
+                        📝 تسجيل الجميع حفظ
+                    </button>
+                    <input type="month" id="attendance-month" class="form-control" style="max-width: 200px;">
+                    <button class="btn btn-success" onclick="exportMonthlyAttendance()">📤 تصدير غياب الشهر</button>
+                </div>
+            </div>
+
+            <div class="stats-grid" style="margin: 2rem 0;">
+                <div class="stat-card">
+                    <div class="stat-card-icon">✅</div>
+                    <div class="number" id="daily-present">1</div>
+                    <div class="label">حاضر</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">❌</div>
+                    <div class="number" id="daily-absent">0</div>
+                    <div class="label">غائب</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">👥</div>
+                    <div class="number" id="daily-total">1</div>
+                    <div class="label">إجمالي الطلاب</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon">📊</div>
+                    <div class="number" id="daily-percentage">100%</div>
+                    <div class="label">نسبة الحضور</div>
+                </div>
+            </div>
+
+            <h3 style="text-align: center; margin: 2rem 0;" id="attendance-title">ملخص الحضور لتاريخ 2025/7/30</h3>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الصف</th>
+                            <th>الفصل</th>
+                            <th>الحالة</th>
+                            <th>الوقت</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendance-table-body">
+                        <tr>
+                            <td>يوسف أحمد راضي التواتي</td>
+                            <td>الصف الأول الإعدادي</td>
+                            <td>فصل 1</td>
+                            <td><button class="btn btn-success" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">حاضر</button></td>
+                            <td>8:30 ص</td>
+                            <td>
+                                <button class="btn btn-success" onclick="toggleAttendance(this, 'present')" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+                                    ✅
+                                </button>
+                                <button class="btn btn-danger" onclick="toggleAttendance(this, 'absent')" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+                                    ❌
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Grades Tab -->
+        <div id="grades" class="tab-content">
+            <div class="controls">
+                <div class="controls-row">
+                    <button class="btn btn-success" onclick="exportGradesSemester('semester1')">📥 تصدير درجات ف1</button>
+                    <button class="btn btn-warning" onclick="exportGradesSemester('semester2')">📥 تصدير درجات ف2</button>
+                    <select id="grades-grade" class="form-control" onchange="filterGrades()" style="max-width: 200px;">
+                        <option value="">جميع الصفوف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                    <select id="grades-class" class="form-control" onchange="filterGrades()" style="max-width: 200px;">
+                        <option value="">جميع الفصول</option>
+                    </select>
+                    <select id="semester-select" class="form-control" onchange="updateGradesTable()" style="max-width: 200px;">
+                        <option value="1">الفصل الدراسي الأول</option>
+                        <option value="2">الفصل الدراسي الثاني</option>
+                    </select>
+                </div>
+                <button class="btn btn-warning" onclick="document.getElementById('import-grades-file').click()">
+        📥 استيراد درجات من Excel
+    </button>
+    <input type="file" id="import-grades-file" accept=".xlsx,.xls" style="display: none;" onchange="importGradesFromExcel(event)">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الصف</th>
+                            <th>الفصل</th>
+                            <th>اللغة العربية</th>
+                            <th>الرياضيات</th>
+                            <th>العلوم</th>
+                            <th>اللغة الإنجليزية</th>
+                            <th>الدراسات الاجتماعية</th>
+                            <th>المجموع</th>
+                            <th>النسبة</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grades-table-body">
+                        <tr>
+                            <td>يوسف أحمد راضي التواتي</td>
+                            <td>الصف الأول الإعدادي</td>
+                            <td>فصل 1</td>
+                            <td><input type="number" class="form-control" placeholder="40" style="width: 80px; padding: 0.3rem;" onchange="calculateGrades(this)"></td>
+                            <td><input type="number" class="form-control" placeholder="30" style="width: 80px; padding: 0.3rem;" onchange="calculateGrades(this)"></td>
+                            <td><input type="number" class="form-control" placeholder="30" style="width: 80px; padding: 0.3rem;" onchange="calculateGrades(this)"></td>
+                            <td><input type="number" class="form-control" placeholder="30" style="width: 80px; padding: 0.3rem;" onchange="calculateGrades(this)"></td>
+                            <td><input type="number" class="form-control" placeholder="20" style="width: 80px; padding: 0.3rem;" onchange="calculateGrades(this)"></td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="controls">
+                <div class="controls-row">
+                    <select id="reports-grade" class="form-control" onchange="generateReports()" style="max-width: 200px;">
+                        <option value="">جميع الصفوف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                    <select id="reports-class" class="form-control" onchange="generateReports()" style="max-width: 200px;">
+                        <option value="">جميع الفصول</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <div class="report-icon">🏆</div>
+                    <div class="report-title">أعلى 10 طلاب في الحضور</div>
+                </div>
+                <div id="top-attendance-report">
+                    <div class="top-student">
+                        <div class="student-rank gold">1</div>
+                        <div style="flex: 1;">
+                            <h4>يوسف أحمد راضي التواتي</h4>
+                            <p>الصف الأول الإعدادي - فصل 1</p>
+                        </div>
+                        <div style="color: #4ecdc4; font-weight: bold; font-size: 1.2rem;">100%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <div class="report-icon">💎</div>
+                    <div class="report-title">أعلى 10 طلاب في الدرجات</div>
+                </div>
+                <div id="top-grades-report">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💎</div>
+                        <p>لا توجد درجات مسجلة بعد</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="report-header">
+                    <div class="report-icon">❌</div>
+                    <div class="report-title">الطلاب الراسبون</div>
+                </div>
+                <div id="failed-students-report">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>لا يوجد طلاب راسبون</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificates Tab -->
+        <div id="certificates" class="tab-content">
+            <div class="controls">
+                <div class="controls-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>الصف:</label>
+                        <select id="cert-grade" class="form-control" onchange="updateCertificateClasses()" style="max-width: 200px;">
+                            <option value="">اختر الصف</option>
+                            <option value="1">الصف الأول الإعدادي</option>
+                            <option value="2">الصف الثاني الإعدادي</option>
+                            <option value="3">الصف الثالث الإعدادي</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>الفصل:</label>
+                        <select id="cert-class" class="form-control" onchange="updateCertificateStudents()" style="max-width: 200px;">
+                            <option value="">اختر الفصل</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>الطالب:</label>
+                        <select id="cert-student" class="form-control" style="max-width: 250px;">
+                            <option value="">اختر الطالب</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="controls-row">
+                    <button class="btn btn-primary" onclick="generateCertificate()">
+                        📄 طباعة
+                    </button>
+                    <button class="btn btn-success" onclick="downloadCertificatePDF()">
+                        📥 تحميل PDF
+                    </button>
+                    <button class="btn btn-warning" onclick="previewCertificate()">
+                        👁️ معاينة الإفادة
+                    </button>
+                </div>
+            </div>
+
+            <div id="certificate-preview" style="display: none; margin-top: 2rem;">
+                <div class="certificate-container">
+                    <div class="certificate-quarter">
+                        <div class="certificate-header">
+                            <h2>مديرية التربية والتعليم بكفر الشيخ</h2>
+                            <h3>إدارة شرق كفر الشيخ التعليمية</h3>
+                            <h3>مدرسة الشهيد حمدي الاعدادية بنين</h3>
+                            <hr style="margin: 1rem 0; border: 1px solid #333;">
+                        </div>
+                        <div class="certificate-content">
+                            <div class="certificate-row">
+                                <span>اسم الطالب:</span>
+                                <span id="cert-student-name">يوسف أحمد راضي التواتي</span>
+                            </div>
+                            <div class="certificate-row">
+                                <span>الصف:</span>
+                                <span id="cert-student-grade">الصف الأول الإعدادي - فصل 1</span>
+                                <span>العام الدراسي:</span>
+                                <span id="cert-academic-year">2024-2025</span>
+                            </div>
+                            <div class="certificate-row">
+                                <span>تاريخ الميلاد:</span>
+                                <span id="cert-birth-date">2009/7/1</span>
+                                <span>تاريخ التحرير:</span>
+                                <span id="cert-issue-date">2025/7/30</span>
+                            </div>
+                        </div>
+                        <div class="certificate-footer">
+                            <span>شؤون الطلبة</span>
+                            <span>يعتمد مدير المدرسة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="controls">
+                <h3>إعدادات العام الدراسي</h3>
+                <div class="controls-row">
+                    <div class="form-group">
+                        <label>بداية العام الدراسي:</label>
+                        <input type="date" id="academic-start" class="form-control" value="2025-09-21">
+                    </div>
+                    <div class="form-group">
+                        <label>نهاية العام الدراسي:</label>
+                        <input type="date" id="academic-end" class="form-control" value="2026-05-30">
+                    </div>
+                    <button class="btn btn-primary" onclick="saveAcademicYear()">
+                        💾 حفظ التعديلات
+                    </button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <h3>نقل الطلاب للصف التالي</h3>
+                <div class="controls-row">
+                    <p style="background: rgba(79, 172, 254, 0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                        يتم نقل الطلاب الناجحين تلقائياً للصف التالي بعد انتهاء العام الدراسي من خلال الضغط على الزر أدناه.
+                    </p>
+                    <select id="promotion-grade" class="form-control" style="max-width: 200px;">
+                        <option value="">اختر الصف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                    <button class="btn btn-success" onclick="promoteStudents()">
+                        ⬆️ نقل الطلاب الناجحين
+                    </button>
+                    <select id="move-student-select" class="form-control" style="max-width: 220px;"></select>
+                    <select id="move-target-class" class="form-control" style="max-width: 160px;">
+                        <option value="">اختر الفصل الجديد</option>
+                        <option value="1">فصل 1</option>
+                        <option value="2">فصل 2</option>
+                        <option value="3">فصل 3</option>
+                        <option value="4">فصل 4</option>
+                        <option value="5">فصل 5</option>
+                        <option value="6">فصل 6</option>
+                        <option value="7">فصل 7</option>
+                        <option value="8">فصل 8</option>
+                        <option value="9">فصل 9</option>
+                        <option value="10">فصل 10</option>
+                        <option value="11">فصل 11</option>
+                        <option value="12">فصل 12</option>
+                        <option value="13">فصل 13</option>
+                        <option value="14">فصل 14</option>
+                        <option value="15">فصل 15</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="moveStudentToClass()">↔️ نقل طالب لفصل آخر</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <h3>النسخ الاحتياطي واستعادة البيانات</h3>
+                <div class="controls-row">
+                    <button class="btn btn-success" onclick="exportBackup()">
+                        📥 نسخ احتياطي
+                    </button>
+                    <button class="btn btn-warning" onclick="document.getElementById('restore-file').click()">
+                        📤 استعادة البيانات
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllData()">
+                        🗑️ مسح كل البيانات
+                    </button>
+                    <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="importBackup(event)">
+                </div>
+                <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-right: 4px solid #ff6b6b;">
+                    <p><strong>تنبيه:</strong> يُنصح بعمل نسخة احتياطية قبل القيام بأي عمليات مسح أو استعادة للبيانات.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: linear-gradient(135deg, #1a1d29 0%, #2d3142 100%); padding: 3rem 0 1rem; margin-top: 4rem; text-align: center; border-top: 3px solid #4facfe; position: relative;">
+        <div class="container">
+            <div style="color: var(--text-light); opacity: 0.9;">
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="font-size: 1.3rem; margin-bottom: 1rem; color: #4facfe; font-weight: bold;">
+                        نظام إدارة شؤون الطلاب
+                    </h4>
+                    <p style="font-size: 1rem; margin-bottom: 0.5rem; opacity: 0.8;">
+                        نظام متكامل لإدارة الطلاب والحضور والدرجات
+                    </p>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+                    <p style="font-size: 0.9rem; margin: 0; color: rgba(255,255,255,0.6);">
+                        © <span id="current-year"></span> Copyright Youssef Ellawaty - جميع الحقوق محفوظة
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Student Card Modal -->
+    <div id="student-card-modal" class="modal" style="display: none;">
+        <div class="modal-content student-card">
+            <div class="modal-header">
+                <h3 id="student-card-name">بطاقة الطالب</h3>
+                <span class="close-modal" onclick="closeStudentCard()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="student-info-grid">
+                    <div class="info-section">
+                        <h4>البيانات الأساسية</h4>
+                        <div class="info-row">
+                            <span class="label">الاسم:</span>
+                            <span id="card-student-name"></span>
+                        </div>
+                        <div class="info-row">
+                           <span class="label">الرقم القومي:</span>
+                           <span id="card-student-id"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">الصف:</span>
+                            <span id="card-student-grade"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">الفصل:</span>
+                            <span id="card-student-class"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">تاريخ الميلاد:</span>
+                            <span id="card-student-birth"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">نسبة الحضور:</span>
+                            <span id="card-student-attendance"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notes-section">
+                    <h4>ملاحظات:</h4>
+                    <textarea id="card-student-notes" rows="3" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;"></textarea>
+                    <button onclick="saveStudentNotes()" class="btn btn-primary" style="margin-top: 0.5rem;">حفظ الملاحظات</button>
+                </div>
+                
+                <div class="card-actions">
+                    <button onclick="editStudentFromCard()" class="btn btn-secondary">تعديل البيانات</button>
+                    <button onclick="deleteStudentFromCard()" class="btn btn-danger">حذف الطالب</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">إضافة طالب جديد</h2>
+                <button class="close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="student-form">
+                <div class="form-group">
+                    <label>الاسم الكامل:</label>
+                    <input type="text" id="student-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>الرقم القومي:</label>
+                    <input type="text" id="student-id" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف:</label>
+                    <input type="tel" id="student-phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>رقم هاتف ولي الأمر:</label>
+                    <input type="tel" id="parent-phone" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>الصف:</label>
+                    <select id="student-grade" class="form-control" required onchange="updateClassOptions()">
+                        <option value="">اختر الصف</option>
+                        <option value="1">الصف الأول الإعدادي</option>
+                        <option value="2">الصف الثاني الإعدادي</option>
+                        <option value="3">الصف الثالث الإعدادي</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>الفصل:</label>
+                    <select id="student-class" class="form-control" required>
+                        <option value="">اختر الفصل</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الميلاد:</label>
+                    <input type="date" id="student-birthdate" class="form-control" required>
+                </div>
+                <div class="controls-row">
+                    <button type="submit" class="btn btn-primary">💾 حفظ</button>
+                    <button type="button" class="btn btn-danger" onclick="closeModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Global data storage
+        let students = [
+            {
+                name: 'يوسف أحمد راضي التواتي',
+                nationalId: '30507012301234',
+                phone: '01123456789',
+                parentPhone: '01005537722',
+                grade: 1,
+                class: 1,
+                birthDate: '2009-07-01',
+                gender: 'ذكر',
+                attendance: {},
+                grades: {
+                    semester1: {
+                        arabic: null,
+                        math: null,
+                        science: null,
+                        english: null,
+                        social: null
+                    },
+                    semester2: {
+                        arabic: null,
+                        math: null,
+                        science: null,
+                        english: null,
+                        social: null
+                    }
+                },
+                notes: '',
+                status: 'active'
+            }
+        ];
+
+        let settings = {
+            academicStart: '2024-09-01',
+            academicEnd: '2025-06-30',
+            currentTheme: 'dark'
+        };
+
+        let attendanceData = {};
+        let graduatedStudents = [];
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            updateDashboard();
+            updateClassOptions();
+            setCurrentDate();
+            generateReports();
+            // Autosave every 5 seconds
+            window.__autosaveInterval = setInterval(saveData, 5000);
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        });
+
+        // Data management
+        function saveData() {
+            localStorage.setItem('studentManagementData', JSON.stringify({
+                students: students,
+                settings: settings,
+                attendanceData: attendanceData,
+                graduatedStudents: graduatedStudents
+            }));
+        }
+
+        // Ensure data persistence on unload
+        window.addEventListener('beforeunload', function() {
+            try { saveData(); } catch (e) {}
+        });
+
+        function loadData() {
+            const saved = localStorage.getItem('studentManagementData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                students = data.students || students;
+                // Fix grade structure for existing students
+                students.forEach(student => {
+                    if (!student.grades.semester1) {
+                        student.grades = {
+                            semester1: {
+                                arabic: student.grades.arabic || null,
+                                math: student.grades.math || null,
+                                science: student.grades.science || null,
+                                english: student.grades.english || null,
+                                social: student.grades.social || null
+                            },
+                            semester2: {
+                                arabic: null,
+                                math: null,
+                                science: null,
+                                english: null,
+                                social: null
+                            }
+                        };
+                    }
+                });
+                settings = data.settings || settings;
+                attendanceData = data.attendanceData || {};
+                graduatedStudents = data.graduatedStudents || [];
+            }
+        }
+        
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Update nav buttons
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content based on tab
+            if (tabName === 'students') {
+                updateStudentsTable();
+            } else if (tabName === 'attendance') {
+                updateAttendanceTable();
+            } else if (tabName === 'grades') {
+                updateGradesTable();
+            } else if (tabName === 'reports') {
+                generateReports();
+            }
+        }
+
+        // Dashboard functions
+        function updateDashboard() {
+            const grade1Count = students.filter(s => s.grade === 1 && s.status === 'active').length;
+            const grade2Count = students.filter(s => s.grade === 2 && s.status === 'active').length;
+            const grade3Count = students.filter(s => s.grade === 3 && s.status === 'active').length;
+            const totalStudents = grade1Count + grade2Count + grade3Count;
+
+            document.getElementById('grade1-count').textContent = grade1Count;
+            document.getElementById('grade2-count').textContent = grade2Count;
+            document.getElementById('grade3-count').textContent = grade3Count;
+            document.getElementById('total-students').textContent = totalStudents;
+
+            // Update attendance stats
+            const today = new Date().toISOString().split('T')[0];
+            const todayAttendance = attendanceData[today] || {};
+            let presentCount = 0;
+            let absentCount = 0;
+
+            students.filter(s => s.status === 'active').forEach(student => {
+                const state = todayAttendance[student.name];
+                if (state === 'excused') {
+                    // exclude from totals
+                    return;
+                } else if (state === 'absent') {
+                    absentCount++;
+                } else {
+                    presentCount++; // Default to present
+                }
+            });
+
+            document.getElementById('total-present').textContent = presentCount;
+            document.getElementById('total-absent').textContent = absentCount;
+            const effectiveTotal = totalStudents - Object.values(todayAttendance).filter(v => v === 'excused').length;
+            const percentage = effectiveTotal > 0 ? Math.round((presentCount / effectiveTotal) * 100) : 100;
+            document.getElementById('attendance-percentage').textContent = percentage + '%';
+        }
+
+// ...existing code...
+function showClasses(grade) {
+    const classesGrid = document.getElementById('classes-grid');
+    const classesSection = document.getElementById('classes-section');
+    
+    classesGrid.innerHTML = '';
+    // عدد الفصول حسب الصف
+    const classCount = grade == 1 ? 15 : 12;
+    for (let i = 1; i <= classCount; i++) {
+        const classStudents = students.filter(s => s.grade === grade && s.class === i && s.status === 'active');
+        const classCard = document.createElement('div');
+        classCard.className = 'class-card';
+        classCard.onclick = () => navigateToStudentsTab(grade, i);
+        classCard.innerHTML = `
+            <h4>فصل ${i}</h4>
+            <p>${classStudents.length} طالب</p>
+        `;
+        classesGrid.appendChild(classCard);
+    }
+    
+    classesSection.style.display = 'block';
+    classesGrid.classList.add('active');
+}
+// ...existing code...
+
+        function navigateToStudentsTab(grade, classNum) {
+            showTab('students');
+            document.getElementById('filter-grade').value = grade;
+            updateClassFilter();
+            document.getElementById('filter-class').value = classNum;
+            filterStudents();
+        }
+
+        // Student management
+        function showAddStudentModal() {
+            document.getElementById('modal-title').textContent = 'إضافة طالب جديد';
+            document.getElementById('student-form').reset();
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function editStudent(studentName) {
+            const student = students.find(s => s.name === studentName);
+            if (!student) return;
+
+            document.getElementById('modal-title').textContent = 'تعديل بيانات الطالب';
+            document.getElementById('student-name').value = student.name;
+            document.getElementById('student-id').value = student.nationalId;
+            document.getElementById('student-phone').value = student.phone;
+            document.getElementById('parent-phone').value = student.parentPhone;
+            document.getElementById('student-grade').value = student.grade;
+            updateClassOptions();
+            document.getElementById('student-class').value = student.class;
+            document.getElementById('student-birthdate').value = student.birthDate;
+            document.getElementById('student-gender').value = student.gender;
+            
+            document.getElementById('student-modal').classList.add('active');
+        }
+
+        function deleteStudent(studentName) {
+            if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
+                const index = students.findIndex(s => s.name === studentName);
+                if (index > -1) {
+                    students.splice(index, 1);
+                    saveData();
+                    updateDashboard();
+                    updateStudentsTable();
+                    showToast('تم حذف الطالب بنجاح', 'success');
+                }
+            }
+        }
+
+        function showStudentCard(studentName) {
+            const student = students.find(s => s.name === studentName);
+            if (!student) return;
+            document.getElementById('card-student-id').textContent = student.nationalId;
+            const totalDays = calculateTotalSchoolDays();
+            const presentDays = calculateStudentAttendance(student.name);
+            const attendancePercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 100;
+
+            const gradeNames = {
+                arabic: 'اللغة العربية',
+                math: 'الرياضيات', 
+                science: 'العلوم',
+                english: 'اللغة الإنجليزية',
+                social: 'الدراسات الاجتماعية'
+            };
+
+            const maxGrades = {
+                arabic: 40,
+                math: 30,
+                science: 30,
+                english: 30,
+                social: 20
+            };
+
+            // Calculate semester 1 grades
+            let totalGrades1 = 0;
+            let totalMax1 = 0;
+            let failedSubjects1 = [];
+            
+            // Calculate semester 2 grades
+            let totalGrades2 = 0;
+            let totalMax2 = 0;
+            let failedSubjects2 = [];
+            
+            // Calculate total grades
+            let totalGradesAll = 0;
+            let totalMaxAll = 0;
+            let failedSubjectsAll = [];
+            
+            let gradesHtml = '<h4>الفصل الدراسي الأول</h4><div class="grades-grid">';
+
+            Object.keys(gradeNames).forEach(subject => {
+                const grade1 = student.grades.semester1[subject] || 0;
+                const grade2 = student.grades.semester2[subject] || 0;
+                const totalGrade = grade1 + grade2;
+                const maxGrade = maxGrades[subject];
+                const isPassing1 = grade1 >= (maxGrade * 0.25);
+                const isPassing2 = grade2 >= (maxGrade * 0.25);
+                const isPassingTotal = totalGrade >= (maxGrade * 0.5);
+                
+                if (grade1 > 0) {
+                    totalGrades1 += grade1;
+                    totalMax1 += maxGrade / 2;
+                    if (!isPassing1) {
+                        failedSubjects1.push(gradeNames[subject]);
+                    }
+                }
+                
+                if (grade2 > 0) {
+                    totalGrades2 += grade2;
+                    totalMax2 += maxGrade / 2;
+                    if (!isPassing2) {
+                        failedSubjects2.push(gradeNames[subject]);
+                    }
+                }
+                
+                if (totalGrade > 0) {
+                    totalGradesAll += totalGrade;
+                    totalMaxAll += maxGrade;
+                    if (!isPassingTotal) {
+                        failedSubjectsAll.push(gradeNames[subject]);
+                    }
+                }
+
+                gradesHtml += `
+                    <div class="grade-item ${isPassing1 ? 'pass' : 'fail'}">
+                        <h5>${gradeNames[subject]}</h5>
+                        <div class="grade">${grade1 || '-'}/${maxGrade/2}</div>
+                        <input type="number" class="form-control" style="margin-top: 0.5rem; font-size: 0.8rem;" 
+                               value="${grade1 || ''}" max="${maxGrade/2}" 
+                               onchange="updateStudentGrade('${student.name}', 'semester1', '${subject}', this.value)">
+                    </div>
+                `;
+            });
+
+            gradesHtml += '</div><h4>الفصل الدراسي الثاني</h4><div class="grades-grid">';
+
+            Object.keys(gradeNames).forEach(subject => {
+                const grade2 = student.grades.semester2[subject] || 0;
+                const maxGrade = maxGrades[subject];
+                const isPassing2 = grade2 >= (maxGrade * 0.25);
+
+                gradesHtml += `
+                    <div class="grade-item ${isPassing2 ? 'pass' : 'fail'}">
+                        <h5>${gradeNames[subject]}</h5>
+                        <div class="grade">${grade2 || '-'}/${maxGrade/2}</div>
+                        <input type="number" class="form-control" style="margin-top: 0.5rem; font-size: 0.8rem;" 
+                               value="${grade2 || ''}" max="${maxGrade/2}" 
+                               onchange="updateStudentGrade('${student.name}', 'semester2', '${subject}', this.value)">
+                    </div>
+                `;
+            });
+
+            gradesHtml += '</div>';
+
+            const percentage1 = totalMax1 > 0 ? Math.round((totalGrades1 / totalMax1) * 100) : 0;
+            const percentage2 = totalMax2 > 0 ? Math.round((totalGrades2 / totalMax2) * 100) : 0;
+            const percentageAll = totalMaxAll > 0 ? Math.round((totalGradesAll / totalMaxAll) * 100) : 0;
+            const isPassing = failedSubjectsAll.length === 0 && percentageAll >= 50;
+
+            const cardContent = `
+                <div class="student-card">
+                    <div class="student-info-grid">
+                        <div class="info-item">
+                            <h4>الاسم الكامل</h4>
+                            <p>${student.name}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>الرقم القومي</h4>
+                            <p>${student.nationalId}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>رقم الهاتف</h4>
+                            <p>${student.phone}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>رقم هاتف ولي الأمر</h4>
+                            <p>${student.parentPhone}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>الصف والفصل</h4>
+                            <p>الصف ${getGradeName(student.grade)} - فصل ${student.class}</p>
+                        </div>
+                        <div class="info-item">
+                            <h4>تاريخ الميلاد</h4>
+                            <p>${student.birthDate}</p>
+                        </div>
+                    </div>
+
+                    <div class="attendance-summary">
+                        <div class="attendance-percentage">${attendancePercentage}%</div>
+                        <p>نسبة الحضور (${presentDays} من ${totalDays} يوم)</p>
+                    </div>
+
+                    <h3 style="text-align: center; margin: 2rem 0;">درجات المواد</h3>
+                    <div class="grades-grid">
+                        ${gradesHtml}
+                    </div>
+
+                    <div style="text-align: center; margin: 2rem 0;">
+                        <div class="student-status ${isPassing ? 'pass' : 'fail'}">
+                            ${isPassing ? 'ناجح' : 'راسب'}
+                        </div>
+                        ${totalMaxAll > 0 ? `
+                            <p>الفصل الأول: ${totalGrades1}/${totalMax1} (${percentage1}%)</p>
+                            <p>الفصل الثاني: ${totalGrades2}/${totalMax2} (${percentage2}%)</p>
+                            <p>المجموع الكلي: ${totalGradesAll}/${totalMaxAll} (${percentageAll}%)</p>
+                        ` : ''}
+                    </div>
+
+                    ${failedSubjectsAll.length > 0 ? `
+                        <div class="failed-subjects">
+                            <h4>المواد الراسب بها:</h4>
+                            <p>${failedSubjectsAll.join('، ')}</p>
+                        </div>
+                    ` : ''}
+
+                    <div class="notes-section">
+                        <h4>ملاحظات:</h4>
+                        <textarea placeholder="اكتب ملاحظاتك هنا..." 
+                                  onchange="updateStudentNotes('${student.name}', this.value)">${student.notes || ''}</textarea>
+                    </div>
+
+                    <div class="controls-row" style="margin-top: 2rem;">
+                        <button class="btn btn-primary" onclick="editStudent('${student.name}')">
+                            ✏️ تعديل البيانات
+                        </button>
+                        <button class="btn btn-warning" onclick="promoteStudent('${student.name}')">
+                            ⬆️ نقل للصف التالي
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteStudentFromCard('${student.name}')">
+                            🗑️ حذف الطالب
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('student-card-content').innerHTML = cardContent;
+            document.getElementById('student-card-modal').classList.add('active');
+        }
+
+        function updateStudentGrade(studentName, semester, subject, value) {
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                if (semester === 'semester1' || semester === 'semester2') {
+                    student.grades[semester][subject] = value ? parseInt(value) : null;
+                } else {
+                    // Backward compatibility
+                    student.grades.semester1[subject] = value ? parseInt(value) : null;
+                }
+                saveData();
+                showToast('تم تحديث الدرجة بنجاح', 'success');
+            }
+        }
+
+        function updateStudentNotes(studentName, notes) {
+            const student = students.find(s => s.name === studentName);
+            if (student) {
+                student.notes = notes;
+                saveData();
+                showToast('تم حفظ الملاحظات بنجاح', 'success');
+            }
+        }
+
+        function promoteStudent(studentName) {
+            const student = students.find(s => s.name === studentName);
+            if (!student) return;
+
+            if (student.grade >= 3) {
+                if (confirm('هذا الطالب في الصف الثالث الإعدادي. هل تريد نقله إلى المتخرجين؟')) {
+                    student.status = 'graduated';
+                    graduatedStudents.push({
+                        ...student,
+                        graduationDate: new Date().toISOString().split('T')[0]
+                    });
+                    saveData();
+                    updateDashboard();
+                    updateStudentsTable();
+                    closeStudentCard();
+                    showToast('تم نقل الطالب إلى المتخرجين بنجاح', 'success');
+                }
+            } else {
+                if (confirm(`هل تريد نقل الطالب إلى ${getGradeName(student.grade + 1)}؟`)) {
+                    student.grade += 1;
+                    student.class = 1; // Reset to first class in new grade
+                    // Reset all grades for the new academic year
+                    student.grades = {
+                        semester1: { arabic: null, math: null, science: null, english: null, social: null },
+                        semester2: { arabic: null, math: null, science: null, english: null, social: null }
+                    };
+                    saveData();
+                    updateDashboard();
+                    updateStudentsTable();
+                    showStudentCard(studentName); // Refresh the card
+                    showToast('تم نقل الطالب بنجاح وتهيئة الدرجات للسنة الجديدة', 'success');
+                }
+            }
+        }
+
+        function deleteStudentFromCard(studentName) {
+            closeStudentCard();
+            deleteStudent(studentName);
+        }
+
+        function closeModal() {
+            document.getElementById('student-modal').classList.remove('active');
+        }
+
+        function closeStudentCard() {
+            document.getElementById('student-card-modal').classList.remove('active');
+        }
+
+        // Form submission
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('student-name').value,
+                nationalId: document.getElementById('student-id').value,
+                phone: document.getElementById('student-phone').value,
+                parentPhone: document.getElementById('parent-phone').value,
+                grade: parseInt(document.getElementById('student-grade').value),
+                class: parseInt(document.getElementById('student-class').value),
+                birthDate: document.getElementById('student-birthdate').value,
+                gender: document.getElementById('student-gender').value,
+                attendance: {},
+                grades: {
+                    semester1: {
+                        arabic: null,
+                        math: null,
+                        science: null,
+                        english: null,
+                        social: null
+                    },
+                    semester2: {
+                        arabic: null,
+                        math: null,
+                        science: null,
+                        english: null,
+                        social: null
+                    }
+                },
+                notes: '',
+                status: 'active'
+            };
+
+            // Check if editing existing student
+            const existingIndex = students.findIndex(s => s.name === formData.name);
+            if (existingIndex > -1) {
+                // Keep attendance and grades data
+                formData.attendance = students[existingIndex].attendance;
+                formData.grades = students[existingIndex].grades || {
+                    semester1: { arabic: null, math: null, science: null, english: null, social: null },
+                    semester2: { arabic: null, math: null, science: null, english: null, social: null }
+                };
+                formData.notes = students[existingIndex].notes;
+                students[existingIndex] = formData;
+            } else {
+                students.push(formData);
+            }
+
+            saveData();
+            updateDashboard();
+            updateStudentsTable();
+            closeModal();
+            showToast('تم حفظ بيانات الطالب بنجاح', 'success');
+        });
+
+        // Update class options based on selected grade
+function updateClassOptions() {
+    const gradeSelect = document.getElementById('student-grade');
+    const classSelect = document.getElementById('student-class');
+    
+    classSelect.innerHTML = '<option value="">اختر الفصل</option>';
+    if (gradeSelect.value) {
+        // عدد الفصول حسب الصف
+        const classCount = gradeSelect.value == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+}
+
+function updateClassFilter() {
+    const gradeSelect = document.getElementById('filter-grade');
+    const classSelect = document.getElementById('filter-class');
+    
+    classSelect.innerHTML = '<option value="">جميع الفصول</option>';
+    if (gradeSelect.value) {
+        // عدد الفصول حسب الصف
+        const classCount = gradeSelect.value == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+}
+
+        // Update students table
+        function updateStudentsTable() {
+            const tbody = document.getElementById('students-table-body');
+            const filteredStudents = getFilteredStudents();
+            
+            tbody.innerHTML = filteredStudents.map(student => {
+            const totalDays = calculateTotalSchoolDays() - calculateStudentExcusedDaysInAcademicYear(student.name);
+            const presentDays = calculateStudentPresentDaysInAcademicYear(student.name);
+                const attendancePercentage = totalDays > 0 ? Math.round((presentDays / totalDays) * 100) : 100;
+                
+                // Calculate student status with new grade structure
+                let totalGrades = 0;
+                let totalMax = 0;
+                let failedSubjects = 0;
+                let hasAnyGrade = false;
+                const maxGrades = { arabic: 80, math: 60, science: 40, english: 60, social: 40 };
+                
+                Object.keys(maxGrades).forEach(subject => {
+                    const raw1 = student.grades.semester1?.[subject];
+                    const raw2 = student.grades.semester2?.[subject];
+                    const grade1 = raw1 || 0;
+                    const grade2 = raw2 || 0;
+                    const totalGrade = grade1 + grade2;
+                    const maxGrade = maxGrades[subject];
+                    if (raw1 != null || raw2 != null) {
+                        hasAnyGrade = true;
+                    }
+                    if (totalGrade > 0) {
+                        totalGrades += totalGrade;
+                        totalMax += maxGrade;
+                        if (totalGrade < (maxGrade * 0.5)) {
+                            failedSubjects++;
+                        }
+                    }
+                });
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                const isPassing = hasAnyGrade && failedSubjects === 0 && (totalMax === 0 || percentage >= 50);
+                const statusLabel = hasAnyGrade ? (isPassing ? 'ناجح' : 'راسب') : 'لم يتم إضافة درجات';
+                const statusClass = hasAnyGrade ? (isPassing ? 'pass' : 'fail') : 'pending';
+                
+                return `
+                    <tr>
+                        <td><a href="#" class="student-link" onclick="showStudentCard('${student.name}')">${student.name}</a></td>
+                        <td>${getGradeName(student.grade)}</td>
+                        <td>فصل ${student.class}</td>
+                        <td>${student.birthDate}</td>
+                        <td>${student.parentPhone}</td>
+                        <td>${student.nationalId}</td>
+                       <td>
+                           <button class="btn btn-primary" onclick="editStudent('${student.name}')" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                           ✏️ تعديل
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteStudent('${student.name}')" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                        🗑️ حذف
+                        </button>
+                        </td>
+                        </tr>
+                `;
+            }).join('');
+        }
+        
+
+        function getFilteredStudents() {
+            const gradeFilter = document.getElementById('filter-grade')?.value;
+            const classFilter = document.getElementById('filter-class')?.value;
+            
+            return students.filter(student => {
+                if (student.status !== 'active') return false;
+                if (gradeFilter && student.grade != gradeFilter) return false;
+                if (classFilter && student.class != classFilter) return false;
+                return true;
+            });
+        }
+
+        function filterStudents() {
+            updateStudentsTable();
+        }
+
+        // Attendance functions
+        function setCurrentDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('attendance-date').value = today;
+            loadAttendanceForDate();
+        }
+
+        function loadAttendanceForDate() {
+            const date = document.getElementById('attendance-date').value;
+            updateAttendanceTable();
+            updateAttendanceTitle(date);
+        }
+
+        function updateAttendanceTitle(date) {
+            const formattedDate = new Date(date).toLocaleDateString('ar-EG');
+            document.getElementById('attendance-title').textContent = `ملخص الحضور لتاريخ ${formattedDate}`;
+        }
+
+        function updateAttendanceTable() {
+            const tbody = document.getElementById('attendance-table-body');
+            const date = document.getElementById('attendance-date').value;
+            // Enforce date within academic year
+            const start = new Date(settings.academicStart).toISOString().split('T')[0];
+            const endAcademic = new Date(settings.academicEnd).toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0];
+            if (date < start || date > endAcademic) {
+                document.getElementById('attendance-title').textContent = 'التاريخ خارج نطاق العام الدراسي المحدد';
+                tbody.innerHTML = '';
+                document.getElementById('daily-present').textContent = 0;
+                document.getElementById('daily-absent').textContent = 0;
+                document.getElementById('daily-total').textContent = 0;
+                document.getElementById('daily-percentage').textContent = '0%';
+                return;
+            }
+            if (date > today) {
+                document.getElementById('attendance-title').textContent = 'لا يمكن تسجيل الحضور في تاريخ مستقبلي';
+                tbody.innerHTML = '';
+                document.getElementById('daily-present').textContent = 0;
+                document.getElementById('daily-absent').textContent = 0;
+                document.getElementById('daily-total').textContent = 0;
+                document.getElementById('daily-percentage').textContent = '0%';
+                return;
+            }
+            const filteredStudents = getFilteredAttendanceStudents();
+            
+            let presentCount = 0;
+            let absentCount = 0;
+            let excusedCount = 0;
+            
+            tbody.innerHTML = filteredStudents.map(student => {
+                const attendance = attendanceData[date]?.[student.name];
+                const isExcused = attendance === 'excused';
+                const isPresent = attendance === 'present' || attendance === undefined;
+                if (isExcused) {
+                    excusedCount++;
+                } else if (isPresent) {
+                    presentCount++;
+                } else {
+                    absentCount++;
+                }
+                
+                return `
+                    <tr data-student="${student.name}">
+                        <td><a href="#" class="student-link" onclick="showStudentCard('${student.name}')">${student.name}</a></td>
+                        <td>${getGradeName(student.grade)}</td>
+                        <td>فصل ${student.class}</td>
+                        <td>
+                            <button class="btn ${isExcused ? 'btn-warning' : (isPresent ? 'btn-success' : 'btn-danger')}" 
+                                    style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">
+                                ${isExcused ? 'غائب بعذر' : (isPresent ? 'حاضر' : 'غائب')}
+                            </button>
+                        </td>
+                        <td>${isPresent ? '8:30 ص' : '-'}</td>
+                        <td>
+                            <button class="btn btn-success" onclick="toggleAttendance(this, 'present')" 
+                                    style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+                                ✅
+                            </button>
+                            <button class="btn btn-danger" onclick="toggleAttendance(this, 'absent')" 
+                                    style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+                                ❌
+                            </button>
+                            <button class="btn btn-warning" onclick="toggleAttendance(this, 'excused')" 
+                                    style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">
+                                📝
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Update daily stats
+            const effectiveTotal = filteredStudents.length - excusedCount;
+            document.getElementById('daily-present').textContent = presentCount;
+            document.getElementById('daily-absent').textContent = absentCount;
+            document.getElementById('daily-total').textContent = effectiveTotal;
+            const percentage = effectiveTotal > 0 ? Math.round((presentCount / effectiveTotal) * 100) : 100;
+            document.getElementById('daily-percentage').textContent = percentage + '%';
+        }
+
+        function getFilteredAttendanceStudents() {
+            const gradeFilter = document.getElementById('attendance-grade')?.value;
+            const classFilter = document.getElementById('attendance-class')?.value;
+            
+            return students.filter(student => {
+                if (student.status !== 'active') return false;
+                if (gradeFilter && student.grade != gradeFilter) return false;
+                if (classFilter && student.class != classFilter) return false;
+                return true;
+            });
+        }
+
+        function filterAttendance() {
+            updateAttendanceTable();
+        }
+
+        function markAllPresent() {
+            const date = document.getElementById('attendance-date').value;
+            const filteredStudents = getFilteredAttendanceStudents();
+            
+            if (!attendanceData[date]) {
+                attendanceData[date] = {};
+            }
+            
+            filteredStudents.forEach(student => {
+                attendanceData[date][student.name] = 'present';
+            });
+            
+            saveData();
+            updateAttendanceTable();
+            showToast('تم تسجيل جميع الطلاب كحاضرين', 'success');
+        }
+
+        function markAllAbsent() {
+            const date = document.getElementById('attendance-date').value;
+            const filteredStudents = getFilteredAttendanceStudents();
+            
+            if (!attendanceData[date]) {
+                attendanceData[date] = {};
+            }
+            
+            filteredStudents.forEach(student => {
+                attendanceData[date][student.name] = 'absent';
+            });
+            
+            saveData();
+            updateAttendanceTable();
+            showToast('تم تسجيل جميع الطلاب كغائبين', 'warning');
+        }
+
+        function toggleAttendance(button, status) {
+            const row = button.closest('tr');
+            const studentName = row.dataset.student;
+            const date = document.getElementById('attendance-date').value;
+            
+            if (!attendanceData[date]) {
+                attendanceData[date] = {};
+            }
+            
+            attendanceData[date][studentName] = status;
+            saveData();
+            updateAttendanceTable();
+            updateDashboard();
+        }
+
+        function saveAttendance() {
+            saveData();
+            showToast('تم حفظ بيانات الحضور بنجاح', 'success');
+        }
+
+        function recordAllAttendance() {
+            saveAttendance();
+        }
+
+        // Print attendance per selected class as PDF (use browser print -> Save as PDF)
+        function printClassAttendance() {
+            const grade = document.getElementById('attendance-grade').value;
+            const classNum = document.getElementById('attendance-class').value;
+            if (!grade || !classNum) {
+                showToast('يرجى اختيار الصف والفصل أولاً', 'error');
+                return;
+            }
+            // Open print dialog; print styles will limit to attendance table
+            window.print();
+        }
+
+        // Build and print annual attendance table (Sun-Thu across academic year)
+        function printAnnualClassAttendance() {
+            const grade = document.getElementById('attendance-grade').value;
+            const classNum = document.getElementById('attendance-class').value;
+            if (!grade || !classNum) {
+                showToast('يرجى اختيار الصف والفصل أولاً', 'error');
+                return;
+            }
+            const studentsList = students.filter(s => s.status === 'active' && s.grade == grade && s.class == classNum);
+
+            // Create a printable window
+            const win = window.open('', '_blank');
+            const title = `تقرير الغياب السنوي - ${getGradeName(parseInt(grade))} - فصل ${classNum}`;
+            let html = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>${title}</title>
+                <style>body{font-family:'Cairo',Tahoma;}
+                table{border-collapse:collapse;width:100%;}
+                th,td{border:1px solid #000;padding:4px;text-align:center;}
+                th{background:#eee;}
+                </style></head><body>`;
+            html += `<h2>${title}</h2>`;
+            html += `<table><thead><tr><th>الاسم</th><th>أيام الحضور</th><th>النسبة</th></tr></thead><tbody>`;
+
+            const totalDays = calculateTotalSchoolDays();
+            studentsList.forEach(st => {
+                const present = calculateStudentPresentDaysInAcademicYear(st.name);
+                const pct = totalDays > 0 ? Math.round((present/totalDays)*100) : 100;
+                html += `<tr><td>${st.name}</td><td>${present}</td><td>${pct}%</td></tr>`;
+            });
+            html += `</tbody></table></body></html>`;
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+            win.print();
+        }
+
+        // Export annual attendance for current academic year only
+        function exportAnnualAttendance() {
+            const grade = document.getElementById('attendance-grade').value;
+            const classNum = document.getElementById('attendance-class').value;
+            if (!grade || !classNum) {
+                showToast('يرجى اختيار الصف والفصل أولاً', 'error');
+                return;
+            }
+            const studentNames = students
+                .filter(s => s.status === 'active' && s.grade == grade && s.class == classNum)
+                .map(s => s.name);
+            if (studentNames.length === 0) {
+                showToast('لا يوجد طلاب في هذا الفصل', 'warning');
+                return;
+            }
+            const start = new Date(settings.academicStart);
+            const endCap = new Date(settings.academicEnd);
+            const today = new Date();
+            const end = endCap < today ? endCap : today;
+
+            const header = ['التاريخ', ...studentNames];
+            const rows = [];
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dow = d.getDay();
+                if (dow < 0 || dow > 4) continue; // Sun-Thu only
+                const iso = d.toISOString().split('T')[0];
+                const row = { 'التاريخ': iso };
+                studentNames.forEach(name => {
+                    const state = attendanceData[iso]?.[name];
+                    row[name] = state === 'absent' ? 'غائب' : (state === 'excused' ? 'غائب بعذر' : 'حاضر');
+                });
+                rows.push(row);
+            }
+
+            if (rows.length === 0) {
+                showToast('لا توجد أيام دراسة ضمن العام الدراسي المحدد', 'warning');
+                return;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(rows, { header });
+            const cols = header.map((h, idx) => ({ wch: idx === 0 ? 12 : 20 }));
+            ws['!cols'] = cols;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'غياب_العام');
+            XLSX.writeFile(wb, `غياب_سنوي_${getGradeName(parseInt(grade))}_فصل_${classNum}.xlsx`);
+            showToast('تم تصدير الغياب السنوي بنجاح', 'success');
+        }
+
+        // Export monthly attendance for selected class as Excel
+        function exportMonthlyAttendance() {
+            const grade = document.getElementById('attendance-grade').value;
+            const classNum = document.getElementById('attendance-class').value;
+            const monthVal = document.getElementById('attendance-month').value; // YYYY-MM
+            if (!grade || !classNum || !monthVal) {
+                showToast('اختر الصف والفصل والشهر أولاً', 'error');
+                return;
+            }
+            const [year, month] = monthVal.split('-').map(n => parseInt(n));
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 0);
+            const targetStudents = students
+                .filter(s => s.status === 'active' && s.grade == grade && s.class == classNum)
+                .map(s => s.name);
+
+            if (targetStudents.length === 0) {
+                showToast('لا يوجد طلاب في هذا الفصل', 'warning');
+                return;
+            }
+
+            // Build pivot: header = ['التاريخ', ...studentNames]
+            const header = ['التاريخ', ...targetStudents];
+            const rows = [];
+
+            const yearStart = new Date(settings.academicStart);
+            const yearEnd = new Date(settings.academicEnd);
+            const today = new Date();
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                const dow = d.getDay();
+                if (d < yearStart || d > yearEnd) continue; // outside academic year
+                if (d > today) continue; // skip future
+                if (dow < 0 || dow > 4) continue; // Sun-Thu only
+                const iso = d.toISOString().split('T')[0];
+                const row = { 'التاريخ': iso };
+                targetStudents.forEach(name => {
+                    const state = attendanceData[iso]?.[name];
+                    row[name] = state === 'absent' ? 'غائب' : (state === 'excused' ? 'غائب بعذر' : 'حاضر');
+                });
+                rows.push(row);
+            }
+
+            if (rows.length === 0) {
+                showToast('لا توجد أيام دراسة في هذا الشهر', 'warning');
+                return;
+            }
+
+            // Create worksheet with custom header order and column widths
+            const ws = XLSX.utils.json_to_sheet(rows, { header });
+            // Column widths: date wider, names also wide for Arabic
+            const cols = header.map((h, idx) => ({ wch: idx === 0 ? 12 : 20 }));
+            ws['!cols'] = cols;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'غياب_الشهر');
+            XLSX.writeFile(wb, `غياب_${getGradeName(parseInt(grade))}_فصل_${classNum}_${monthVal}.xlsx`);
+            showToast('تم تصدير غياب الشهر بنجاح', 'success');
+        }
+
+        // Grades functions
+        function updateGradesTable() {
+            const tbody = document.getElementById('grades-table-body');
+            const filteredStudents = getFilteredGradesStudents();
+            const semester = document.getElementById('semester-select').value;
+            
+            tbody.innerHTML = filteredStudents.map(student => {
+                const maxGrades = { arabic: 80, math: 60, science: 40, english: 60, social: 40 };
+                
+                let totalGrades = 0;
+                let totalMax = 0;
+                let failedSubjects = 0;
+                let gradesData = {};
+                let hasAnyGrade = false;
+                
+                if (semester === 'total') {
+                    // Show combined grades from both semesters
+                    Object.keys(maxGrades).forEach(subject => {
+                        const raw1 = student.grades.semester1?.[subject];
+                        const raw2 = student.grades.semester2?.[subject];
+                        const grade1 = raw1 || 0;
+                        const grade2 = raw2 || 0;
+                        const totalGrade = grade1 + grade2;
+                        const maxGrade = maxGrades[subject];
+                        gradesData[subject] = totalGrade;
+                        if (raw1 != null || raw2 != null) hasAnyGrade = true;
+                        if (totalGrade > 0) {
+                            totalGrades += totalGrade;
+                            totalMax += maxGrade;
+                            if (totalGrade < (maxGrade * 0.5)) {
+                                failedSubjects++;
+                            }
+                        }
+                    });
+                } else {
+                    // Show specific semester grades
+                    const semesterGrades = student.grades[semester] || {};
+                    Object.keys(maxGrades).forEach(subject => {
+                        const raw = semesterGrades[subject];
+                        const grade = raw || 0;
+                        const maxGrade = maxGrades[subject] / 2; // Half for each semester
+                        gradesData[subject] = grade;
+                        if (raw != null) hasAnyGrade = true;
+                        if (grade > 0) {
+                            totalGrades += grade;
+                            totalMax += maxGrade;
+                            if (grade < (maxGrade * 0.5)) {
+                                failedSubjects++;
+                            }
+                        }
+                    });
+                }
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                const isPassing = hasAnyGrade && failedSubjects === 0 && (totalMax === 0 || percentage >= 50);
+                const statusLabel = hasAnyGrade ? (isPassing ? 'ناجح' : 'راسب') : 'لم يتم إضافة درجات';
+                const statusClass = hasAnyGrade ? (isPassing ? 'pass' : 'fail') : 'pending';
+                
+                // ...داخل tbody.innerHTML = filteredStudents.map(student => { ... })...
+return `
+    <tr data-student="${student.name}">
+        <td><a href="#" onclick="showStudentCard('${student.name}')" style="color: #007bff; text-decoration: none;">${student.name}</a></td>
+        <td>${getGradeName(student.grade)}</td>
+        <td>فصل ${student.class}</td>
+        <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 80 : 40}" max="${semester === 'total' ? 80 : 40}" value="${gradesData.arabic || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'arabic', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
+        <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 60 : 30}" max="${semester === 'total' ? 60 : 30}" value="${gradesData.math || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'math', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
+        <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 40 : 20}" max="${semester === 'total' ? 40 : 20}" value="${gradesData.science || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'science', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
+        <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 60 : 30}" max="${semester === 'total' ? 60 : 30}" value="${gradesData.english || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'english', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
+        <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 40 : 20}" max="${semester === 'total' ? 40 : 20}" value="${gradesData.social || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'social', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
+        <td>${semester === 'total' && totalMax > 0 ? totalGrades : (totalMax > 0 ? totalGrades : '-')}</td>
+        <td>${totalMax > 0 ? percentage + '%' : '-'}</td>
+        <td>${student.nationalId}</td>
+    </tr>
+`;
+// ...existing code...
+            }).join('');
+        }
+
+        function getFilteredGradesStudents() {
+            const gradeFilter = document.getElementById('grades-grade')?.value;
+            const classFilter = document.getElementById('grades-class')?.value;
+            
+            return students.filter(student => {
+                if (student.status !== 'active') return false;
+                if (gradeFilter && student.grade != gradeFilter) return false;
+                if (classFilter && student.class != classFilter) return false;
+                return true;
+            });
+        }
+
+        function filterGrades() {
+            updateGradesTable();
+        }
+
+        function updateGrade(studentName, semester, subject, value) {
+            const maxGrades = { arabic: 40, math: 30, science: 20, english: 30, social: 20 };
+            const numValue = parseInt(value);
+            
+            // Check maximum grade limits for each semester
+            if (numValue > maxGrades[subject]) {
+                showToast(`الدرجة القصوى لمادة ${getSubjectName(subject)} في الفصل الواحد هي ${maxGrades[subject]}`, 'error');
+                updateGradesTable(); // Reset the display
+                return;
+            }
+            
+            const student = students.find(s => s.name === studentName);
+            if (student && semester !== 'total') {
+                if (!student.grades[semester]) {
+                    student.grades[semester] = { arabic: null, math: null, science: null, english: null, social: null };
+                }
+                student.grades[semester][subject] = value ? numValue : null;
+                saveData();
+                updateGradesTable();
+            }
+        }
+        
+        function getSubjectName(subject) {
+            const names = {
+                arabic: 'اللغة العربية',
+                math: 'الرياضيات',
+                science: 'العلوم',
+                english: 'اللغة الإنجليزية',
+                social: 'الدراسات الاجتماعية'
+            };
+            return names[subject] || subject;
+        }
+
+        function calculateGrades(input) {
+            const row = input.closest('tr');
+            updateGradesTable();
+        }
+
+        function addGradesForAll() {
+            showToast('يمكنك إدخال الدرجات مباشرة في الجدول أعلاه', 'info');
+        }
+
+        function exportGrades() {
+            const filteredStudents = getFilteredGradesStudents();
+            const data = filteredStudents.map(student => {
+                const maxGrades = { arabic: 40, math: 30, science: 30, english: 30, social: 20 };
+                
+                let totalGrades = 0;
+                let totalMax = 0;
+                let semester1Total = 0;
+                let semester2Total = 0;
+                
+                Object.keys(maxGrades).forEach(subject => {
+                    const grade1 = student.grades.semester1?.[subject] || 0;
+                    const grade2 = student.grades.semester2?.[subject] || 0;
+                    const totalGrade = grade1 + grade2;
+                    const maxGrade = maxGrades[subject];
+                    if (totalGrade > 0) {
+                        totalGrades += totalGrade;
+                        totalMax += maxGrade;
+                    }
+                    semester1Total += grade1;
+                    semester2Total += grade2;
+                });
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                
+                return {
+                    'الاسم': student.name,
+                    'الصف': getGradeName(student.grade),
+                    'الفصل': `فصل ${student.class}`,
+                    'عربي ف1': student.grades.semester1?.arabic || 0,
+                    'عربي ف2': student.grades.semester2?.arabic || 0,
+                    'رياضيات ف1': student.grades.semester1?.math || 0,
+                    'رياضيات ف2': student.grades.semester2?.math || 0,
+                    'علوم ف1': student.grades.semester1?.science || 0,
+                    'علوم ف2': student.grades.semester2?.science || 0,
+                    'إنجليزي ف1': student.grades.semester1?.english || 0,
+                    'إنجليزي ف2': student.grades.semester2?.english || 0,
+                    'دراسات ف1': student.grades.semester1?.social || 0,
+                    'دراسات ف2': student.grades.semester2?.social || 0,
+                    'مجموع ف1': semester1Total,
+                    'مجموع ف2': semester2Total,
+                    'المجموع الكلي': totalGrades,
+                    'النسبة': percentage + '%'
+                };
+            });
+
+            exportToExcelFile(data, 'تقرير_الدرجات');
+        }
+
+        // Export semester-only grades as a compact sheet
+function exportGradesSemester(semester) {
+    const filteredStudents = getFilteredGradesStudents();
+    // الأعمدة حسب الفصل
+    const subjects = ['arabic', 'math', 'science', 'english', 'social'];
+    const subjectNames = {
+        arabic: 'عربي',
+        math: 'رياضيات',
+        science: 'علوم',
+        english: 'إنجليزي',
+        social: 'دراسات'
+    };
+    const semesterLabel = semester === 'semester1' ? 'ف1' : 'ف2';
+
+    const data = filteredStudents.map(student => {
+        const row = {
+            'الاسم': student.name,
+            'الصف': student.grade,
+            'الفصل': student.class
+        };
+        subjects.forEach(sub => {
+            row[`${subjectNames[sub]} ${semesterLabel}`] = student.grades[semester]?.[sub] || 0;
+        });
+        return row;
+    });
+
+    const title = semester === 'semester1' ? 'درجات_الفصل_الأول' : 'درجات_الفصل_الثاني';
+    exportToExcelFile(data, title);
+}
+
+// Export year totals (both semesters combined)
+        function exportGradesYearTotal() {
+            const filteredStudents = getFilteredGradesStudents();
+            const data = filteredStudents.map(student => {
+                const s1 = student.grades.semester1 || {};
+                const s2 = student.grades.semester2 || {};
+                const arabic = (s1.arabic || 0) + (s2.arabic || 0);
+                const math = (s1.math || 0) + (s2.math || 0);
+                const science = (s1.science || 0) + (s2.science || 0);
+                const english = (s1.english || 0) + (s2.english || 0);
+                const social = (s1.social || 0) + (s2.social || 0);
+                const total = arabic + math + science + english + social; // من 280
+                const percent = Math.round((total / 280) * 100);
+                return {
+                    'الاسم': student.name,
+                    'الصف': getGradeName(student.grade),
+                    'الفصل': `فصل ${student.class}`,
+                    'اللغة العربية (المجموع)': arabic,
+                    'الرياضيات (المجموع)': math,
+                    'العلوم (المجموع)': science,
+                    'الإنجليزي (المجموع)': english,
+                    'الدراسات (المجموع)': social,
+                    'المجموع من 280': total,
+                    'النسبة': percent + '%'
+                };
+            });
+            exportToExcelFile(data, 'درجات_العام_المجموع');
+        }
+
+        // Reports functions
+        function generateReports() {
+            generateTopAttendanceReport();
+            generateTopGradesReport();
+            generateFailedStudentsReport();
+        }
+
+        function generateTopAttendanceReport() {
+            const filteredStudents = getFilteredReportStudents();
+            const studentsWithAttendance = filteredStudents.map(student => {
+                const presentDays = calculateStudentPresentDaysInAcademicYear(student.name);
+                const totalSchoolDays = calculateTotalSchoolDays();
+                const percentage = totalSchoolDays > 0 ? Math.round((presentDays / totalSchoolDays) * 100) : 100;
+                return { ...student, attendancePercentage: percentage, presentDays };
+            }).sort((a, b) => b.presentDays - a.presentDays).slice(0, 10);
+
+            const container = document.getElementById('top-attendance-report');
+            
+            if (studentsWithAttendance.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><p>لا توجد بيانات حضور</p></div>';
+                return;
+            }
+
+            container.innerHTML = studentsWithAttendance.map((student, index) => `
+                <div class="top-student">
+                    <div class="student-rank ${index === 0 ? 'gold' : ''}">${index + 1}</div>
+                    <div style="flex: 1;">
+                        <h4>${student.name}</h4>
+                        <p>${getGradeName(student.grade)} - فصل ${student.class}</p>
+                    </div>
+                    <div style="color: #4ecdc4; font-weight: bold; font-size: 1.2rem;">${student.presentDays} يوم</div>
+                </div>
+            `).join('');
+        }
+
+        function generateTopGradesReport() {
+            const filteredStudents = getFilteredReportStudents();
+            const studentsWithGrades = filteredStudents.map(student => {
+                const maxGrades = { arabic: 80, math: 60, science: 40, english: 60, social: 40 };
+                
+                let totalGrades = 0;
+                let totalMax = 0;
+                
+                Object.keys(maxGrades).forEach(subject => {
+                    const grade1 = student.grades.semester1?.[subject] || 0;
+                    const grade2 = student.grades.semester2?.[subject] || 0;
+                    const totalGrade = grade1 + grade2;
+                    const maxGrade = maxGrades[subject];
+                    if (totalGrade > 0) {
+                        totalGrades += totalGrade;
+                        totalMax += maxGrade;
+                    }
+                });
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                
+                return { ...student, totalGrades, totalMax, percentage };
+            }).filter(student => student.totalMax > 0)
+              .sort((a, b) => b.percentage - a.percentage).slice(0, 10);
+
+            const container = document.getElementById('top-grades-report');
+            
+            if (studentsWithGrades.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💎</div><p>لا توجد درجات مسجلة بعد</p></div>';
+                return;
+            }
+
+            container.innerHTML = studentsWithGrades.map((student, index) => `
+                <div class="top-student">
+                    <div class="student-rank ${index === 0 ? 'gold' : ''}">${index + 1}</div>
+                    <div style="flex: 1;">
+                        <h4>${student.name}</h4>
+                        <p>${getGradeName(student.grade)} - فصل ${student.class}</p>
+                    </div>
+                    <div style="color: #4facfe; font-weight: bold; font-size: 1.2rem;">${student.percentage}%</div>
+                </div>
+            `).join('');
+        }
+
+        function generateFailedStudentsReport() {
+            const filteredStudents = getFilteredReportStudents();
+            const failedStudents = filteredStudents.filter(student => {
+                const maxGrades = { arabic: 80, math: 60, science: 40, english: 60, social: 40 };
+                const gradeNames = {
+                    arabic: 'اللغة العربية',
+                    math: 'الرياضيات',
+                    science: 'العلوم',
+                    english: 'اللغة الإنجليزية',
+                    social: 'الدراسات الاجتماعية'
+                };
+                
+                let failedSubjects = [];
+                let totalGrades = 0;
+                let totalMax = 0;
+                
+                Object.keys(maxGrades).forEach(subject => {
+                    const grade1 = student.grades.semester1?.[subject] || 0;
+                    const grade2 = student.grades.semester2?.[subject] || 0;
+                    const totalGrade = grade1 + grade2;
+                    const maxGrade = maxGrades[subject];
+                    if (totalGrade > 0) {
+                        totalGrades += totalGrade;
+                        totalMax += maxGrade;
+                        if (totalGrade < (maxGrade * 0.5)) {
+                            failedSubjects.push(gradeNames[subject]);
+                        }
+                    }
+                });
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                const isFailed = failedSubjects.length > 0 || (totalMax > 0 && percentage < 50);
+                
+                if (isFailed) {
+                    student.failedSubjects = failedSubjects;
+                    student.percentage = percentage;
+                    return true;
+                }
+                return false;
+            });
+
+            const container = document.getElementById('failed-students-report');
+            
+            if (failedStudents.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><p>لا يوجد طلاب راسبون</p></div>';
+                return;
+            }
+
+            container.innerHTML = failedStudents.map(student => `
+                <div class="top-student" style="border-right: 4px solid #ff6b6b;">
+                    <div class="student-rank" style="background: var(--danger-gradient);">❌</div>
+                    <div style="flex: 1;">
+                        <h4>${student.name}</h4>
+                        <p>${getGradeName(student.grade)} - فصل ${student.class}</p>
+                        ${student.failedSubjects.length > 0 ? `<p style="color: #ff6b6b; font-size: 0.9rem;">راسب في: ${student.failedSubjects.join('، ')}</p>` : ''}
+                    </div>
+                    <div style="color: #ff6b6b; font-weight: bold; font-size: 1.2rem;">${student.percentage}%</div>
+                </div>
+            `).join('');
+        }
+
+        function getFilteredReportStudents() {
+            const gradeFilter = document.getElementById('reports-grade')?.value;
+            const classFilter = document.getElementById('reports-class')?.value;
+            
+            return students.filter(student => {
+                if (student.status !== 'active') return false;
+                if (gradeFilter && student.grade != gradeFilter) return false;
+                if (classFilter && student.class != classFilter) return false;
+                return true;
+            });
+        }
+
+        // Certificate functions
+function updateCertificateClasses() {
+    const grade = document.getElementById('cert-grade').value;
+    const classSelect = document.getElementById('cert-class');
+    
+    classSelect.innerHTML = '<option value="">اختر الفصل</option>';
+    
+    if (grade) {
+        // عدد الفصول حسب الصف
+        const classCount = grade == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+    
+    updateCertificateStudents();
+}
+
+        function updateCertificateStudents() {
+            const grade = document.getElementById('cert-grade').value;
+            const classNum = document.getElementById('cert-class').value;
+            const studentSelect = document.getElementById('cert-student');
+            
+            studentSelect.innerHTML = '<option value="">اختر الطالب</option>';
+            
+            if (grade && classNum) {
+                const filteredStudents = students.filter(s => 
+                    s.grade == grade && s.class == classNum && s.status === 'active'
+                );
+                
+                filteredStudents.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.name;
+                    option.textContent = student.name;
+                    studentSelect.appendChild(option);
+                });
+            }
+        }
+
+        function generateCertificate() {
+            const studentName = document.getElementById('cert-student').value;
+            if (!studentName) {
+                showToast('يرجى اختيار طالب أولاً', 'error');
+                return;
+            }
+            
+            previewCertificate();
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+
+        function previewCertificate() {
+            const studentName = document.getElementById('cert-student').value;
+            if (!studentName) {
+                showToast('يرجى اختيار طالب أولاً', 'error');
+                return;
+            }
+            
+            const student = students.find(s => s.name === studentName);
+            if (!student) return;
+            
+            const today = new Date().toLocaleDateString('ar-EG');
+            const academicYear = `${settings.academicStart.split('-')[0]}-${settings.academicEnd.split('-')[0]}`;
+            
+            document.getElementById('cert-student-name').textContent = student.name;
+            document.getElementById('cert-student-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
+            document.getElementById('cert-academic-year').textContent = academicYear;
+            document.getElementById('cert-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+            document.getElementById('cert-issue-date').textContent = today;
+            
+            document.getElementById('certificate-preview').style.display = 'block';
+        }
+
+        function downloadCertificatePDF() {
+            previewCertificate();
+            showToast('اختر طباعة ثم حفظ كـ PDF من متصفحك', 'info');
+        }
+
+        // Build a simple daily PDF view for class (name, grade, class, status)
+        function downloadDailyAttendancePDF() {
+            const grade = document.getElementById('attendance-grade').value;
+            const classNum = document.getElementById('attendance-class').value;
+            const date = document.getElementById('attendance-date').value;
+            if (!grade || !classNum || !date) {
+                showToast('اختر الصف والفصل والتاريخ أولاً', 'error');
+                return;
+            }
+            const target = students.filter(s => s.status === 'active' && s.grade == grade && s.class == classNum);
+            const win = window.open('', '_blank');
+            const title = `كشف حضور يومي - ${new Date(date).toLocaleDateString('ar-EG')} - ${getGradeName(parseInt(grade))} - فصل ${classNum}`;
+            let html = `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>${title}</title>
+            <style>body{font-family:'Cairo',Tahoma;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #000;padding:6px;text-align:center;}th{background:#eee;}</style></head><body>`;
+            html += `<h3>${title}</h3>`;
+            html += `<table><thead><tr><th>الاسم</th><th>الصف</th><th>الفصل</th><th>الحالة</th></tr></thead><tbody>`;
+            target.forEach(st => {
+                const state = (attendanceData[date]?.[st.name]);
+                const label = state === 'absent' ? 'غائب' : (state === 'excused' ? 'غائب بعذر' : 'حاضر');
+                html += `<tr><td>${st.name}</td><td>${getGradeName(st.grade)}</td><td>فصل ${st.class}</td><td>${label}</td></tr>`;
+            });
+            html += `</tbody></table></body></html>`;
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+            win.print();
+        }
+
+        // Settings functions
+        function saveAcademicYear() {
+            settings.academicStart = document.getElementById('academic-start').value;
+            settings.academicEnd = document.getElementById('academic-end').value;
+            saveData();
+            showToast('تم حفظ إعدادات العام الدراسي', 'success');
+            // refresh move-student selector
+            populateMoveStudentSelector();
+        }
+
+        function promoteStudents() {
+            const grade = document.getElementById('promotion-grade').value;
+            if (!grade) {
+                showToast('يرجى اختيار الصف أولاً', 'error');
+                return;
+            }
+
+            const studentsToPromote = students.filter(s => {
+                if (s.grade != grade || s.status !== 'active') return false;
+                
+                // Check if student is passing with new grade structure
+                const maxGrades = { arabic: 80, math: 60, science: 40, english: 60, social: 40 };
+                
+                let totalGrades = 0;
+                let totalMax = 0;
+                let failedSubjects = 0;
+                
+                Object.keys(maxGrades).forEach(subject => {
+                    const grade1 = s.grades.semester1?.[subject] || 0;
+                    const grade2 = s.grades.semester2?.[subject] || 0;
+                    const totalGrade = grade1 + grade2;
+                    const maxGrade = maxGrades[subject];
+                    if (totalGrade > 0) {
+                        totalGrades += totalGrade;
+                        totalMax += maxGrade;
+                        if (totalGrade < (maxGrade * 0.5)) {
+                            failedSubjects++;
+                        }
+                    }
+                });
+                
+                const percentage = totalMax > 0 ? Math.round((totalGrades / totalMax) * 100) : 0;
+                return failedSubjects === 0 && (totalMax === 0 || percentage >= 50);
+            });
+
+            if (studentsToPromote.length === 0) {
+                showToast('لا يوجد طلاب ناجحون للنقل في هذا الصف', 'warning');
+                return;
+            }
+
+            if (confirm(`هل تريد نقل ${studentsToPromote.length} طالب ناجح للصف التالي؟`)) {
+                let promotedCount = 0;
+                let graduatedCount = 0;
+
+                studentsToPromote.forEach(student => {
+                    if (student.grade >= 3) {
+                        // Graduate student
+                        student.status = 'graduated';
+                        graduatedStudents.push({
+                            ...student,
+                            graduationDate: new Date().toISOString().split('T')[0]
+                        });
+                        graduatedCount++;
+                    } else {
+                        // Promote to next grade and reset grades for new year
+                        student.grade += 1;
+                        student.class = 1; // Reset class
+                        student.grades = {
+                            semester1: { arabic: null, math: null, science: null, english: null, social: null },
+                            semester2: { arabic: null, math: null, science: null, english: null, social: null }
+                        };
+                        promotedCount++;
+                    }
+                });
+
+                saveData();
+                updateDashboard();
+                updateStudentsTable();
+                
+                let message = '';
+                if (promotedCount > 0) message += `تم نقل ${promotedCount} طالب للصف التالي. `;
+                if (graduatedCount > 0) message += `تم تخريج ${graduatedCount} طالب.`;
+                
+                showToast(message, 'success');
+            }
+        }
+
+        // Data import/export functions
+        function exportToExcel() {
+            const data = students.filter(s => s.status === 'active').map(student => ({
+                'الاسم': student.name,
+                'الرقم القومي': student.nationalId,
+                'رقم الهاتف': student.phone,
+                'رقم هاتف ولي الأمر': student.parentPhone,
+                'الصف': student.grade,
+                'الفصل': student.class,
+                'تاريخ الميلاد': student.birthDate
+            }));
+
+            exportToExcelFile(data, 'بيانات_الطلاب');
+        }
+
+        function exportToExcelFile(data, filename) {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, 'البيانات');
+            XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+            showToast('تم تصدير الملف بنجاح', 'success');
+        }
+
+function importFromExcel(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+            let importedCount = 0;
+            jsonData.forEach(row => {
+                // الأعمدة الأساسية المطلوبة فقط
+                if (row['الاسم'] && row['الرقم القومي'] && row['الصف'] && row['الفصل']) {
+                    const student = {
+                        name: row['الاسم'],
+                        nationalId: row['الرقم القومي'],
+                        phone: row['رقم الهاتف'] || '',
+                        parentPhone: row['رقم هاتف ولي الأمر'] || '',
+                        grade: parseInt(row['الصف']),
+                        class: parseInt(row['الفصل']),
+                        birthDate: row['تاريخ الميلاد'] || '',
+                        attendance: {},
+                        grades: {
+                            semester1: { arabic: null, math: null, science: null, english: null, social: null },
+                            semester2: { arabic: null, math: null, science: null, english: null, social: null }
+                        },
+                        notes: '',
+                        status: 'active'
+                    };
+
+                    // إذا كان الطالب موجود بنفس الرقم القومي، يتم تحديث بياناته
+                    const existingIndex = students.findIndex(s => s.nationalId === student.nationalId);
+                    if (existingIndex === -1) {
+                        students.push(student);
+                        importedCount++;
+                    } else {
+                        students[existingIndex] = { ...students[existingIndex], ...student };
+                        importedCount++;
+                    }
+                }
+            });
+
+            saveData();
+            updateDashboard();
+            updateStudentsTable();
+            showToast(`تم استيراد أو تحديث بيانات ${importedCount} طالب بنجاح`, 'success');
+        } catch (error) {
+            showToast('خطأ في قراءة الملف', 'error');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+// ...existing code...
+
+        function exportBackup() {
+            const backupData = {
+                students: students,
+                settings: settings,
+                attendanceData: attendanceData,
+                graduatedStudents: graduatedStudents,
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(backupData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('تم إنشاء النسخة الاحتياطية بنجاح', 'success');
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (confirm('هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم استبدال جميع البيانات الحالية.')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const backupData = JSON.parse(e.target.result);
+                        students = backupData.students || [];
+                        settings = backupData.settings || settings;
+                        attendanceData = backupData.attendanceData || {};
+                        graduatedStudents = backupData.graduatedStudents || [];
+                        
+                        saveData();
+                        updateDashboard();
+                        updateStudentsTable();
+                        showToast('تم استعادة النسخة الاحتياطية بنجاح', 'success');
+                        
+                        // Refresh page to ensure all data is updated
+                        setTimeout(() => location.reload(), 1000);
+                    } catch (error) {
+                        showToast('خطأ في قراءة ملف النسخة الاحتياطية', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('هل أنت متأكد من حذف جميع البيانات؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                if (confirm('تأكيد أخير: سيتم حذف جميع بيانات الطلاب والحضور والدرجات نهائياً!')) {
+                    students = [];
+                    attendanceData = {};
+                    graduatedStudents = [];
+                    saveData();
+                    updateDashboard();
+                    updateStudentsTable();
+                    showToast('تم حذف جميع البيانات', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            }
+        }
+
+        // Utility functions
+        function getGradeName(grade) {
+            const gradeNames = {
+                1: 'الصف الأول الإعدادي',
+                2: 'الصف الثاني الإعدادي',
+                3: 'الصف الثالث الإعدادي'
+            };
+            return gradeNames[grade] || `الصف ${grade}`;
+        }
+
+        function calculateTotalSchoolDays() {
+            const start = new Date(settings.academicStart);
+            const academicEnd = new Date(settings.academicEnd);
+            const today = new Date();
+            const end = academicEnd < today ? academicEnd : today; // limit to today
+            let totalDays = 0;
+            
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const dayOfWeek = date.getDay();
+                // Count Sunday (0) to Thursday (4) as school days
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) {
+                    totalDays++;
+                }
+            }
+            
+            return totalDays;
+        }
+
+        function calculateStudentAttendance(studentName) {
+            let presentDays = 0;
+            let totalRecordedDays = 0;
+            
+            Object.keys(attendanceData).forEach(date => {
+                if (attendanceData[date][studentName] !== undefined) {
+                    totalRecordedDays++;
+                    if (attendanceData[date][studentName] === 'present') {
+                        presentDays++;
+                    }
+                }
+            });
+            
+            // If no attendance records exist, assume 100% for initial display
+            if (totalRecordedDays === 0) {
+                return calculateTotalSchoolDays(); // Return full days as present
+            }
+            
+            return presentDays;
+        }
+
+        // Count present days within the configured academic year (Sun-Thu only)
+        function calculateStudentPresentDaysInAcademicYear(studentName) {
+            const start = new Date(settings.academicStart);
+            const academicEnd = new Date(settings.academicEnd);
+            const today = new Date();
+            const end = academicEnd < today ? academicEnd : today;
+            let presentDays = 0;
+
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const iso = date.toISOString().split('T')[0];
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) { // Sun-Thu
+                    const state = attendanceData[iso]?.[studentName];
+                    // default to present (undefined). Do NOT count excused as present.
+                    if (state === 'present' || state === undefined) {
+                        presentDays++;
+                    }
+                }
+            }
+            return presentDays;
+        }
+
+        function calculateStudentExcusedDaysInAcademicYear(studentName) {
+            const start = new Date(settings.academicStart);
+            const academicEnd = new Date(settings.academicEnd);
+            const today = new Date();
+            const end = academicEnd < today ? academicEnd : today;
+            let excusedDays = 0;
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                const iso = date.toISOString().split('T')[0];
+                const dayOfWeek = date.getDay();
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) {
+                    if (attendanceData[iso]?.[studentName] === 'excused') excusedDays++;
+                }
+            }
+            return excusedDays;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function toggleTheme() {
+            // This is a dark-only theme, so we just show a message
+            showToast('هذا النظام مصمم بالوضع الليلي فقط', 'info');
+        }
+
+        // Initialize filter dropdowns
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup grade change handlers for filters
+            document.getElementById('filter-grade').addEventListener('change', updateClassFilter);
+document.getElementById('attendance-grade').addEventListener('change', function() {
+    const grade = this.value;
+    const classSelect = document.getElementById('attendance-class');
+    classSelect.innerHTML = '<option value="">جميع الفصول</option>';
+    if (grade) {
+        const classCount = grade == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+});
+
+document.getElementById('grades-grade').addEventListener('change', function() {
+    const grade = this.value;
+    const classSelect = document.getElementById('grades-class');
+    classSelect.innerHTML = '<option value="">جميع الفصول</option>';
+    if (grade) {
+        const classCount = grade == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+});
+
+document.getElementById('reports-grade').addEventListener('change', function() {
+    const grade = this.value;
+    const classSelect = document.getElementById('reports-class');
+    classSelect.innerHTML = '<option value="">جميع الفصول</option>';
+    if (grade) {
+        const classCount = grade == 1 ? 15 : 12;
+        for (let i = 1; i <= classCount; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `فصل ${i}`;
+            classSelect.appendChild(option);
+        }
+    }
+});
+
+            populateMoveStudentSelector();
+        });
+
+        function populateMoveStudentSelector() {
+            const sel = document.getElementById('move-student-select');
+            if (!sel) return;
+            sel.innerHTML = '<option value="">اختر الطالب للنقل</option>';
+            students.filter(s => s.status === 'active').forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.textContent = `${s.name} - ${getGradeName(s.grade)} - فصل ${s.class}`;
+                sel.appendChild(opt);
+            });
+        }
+
+        function moveStudentToClass() {
+            const name = document.getElementById('move-student-select').value;
+            const targetClass = parseInt(document.getElementById('move-target-class').value);
+            if (!name || !targetClass) {
+                showToast('اختر الطالب والفصل الجديد أولاً', 'error');
+                return;
+            }
+            const student = students.find(s => s.name === name);
+            if (!student) return;
+            student.class = targetClass;
+            saveData();
+            updateStudentsTable();
+            showToast('تم نقل الطالب للفصل الجديد', 'success');
+        }
+
+        // Student Card Functions
+        let currentCardStudent = null;
+
+        function showStudentCard(studentName) {
+            const student = students.find(s => s.name === studentName);
+            if (!student) return;
+
+            currentCardStudent = studentName;
+            
+            // Fill basic info
+            document.getElementById('student-card-name').textContent = `بطاقة الطالب - ${student.name}`;
+            document.getElementById('card-student-name').textContent = student.name;
+            document.getElementById('card-student-id').textContent = student.nationalId;
+            document.getElementById('card-student-grade').textContent = getGradeName(student.grade);
+            document.getElementById('card-student-class').textContent = `فصل ${student.class}`;
+            document.getElementById('card-student-birth').textContent = student.birthDate || 'غير محدد';
+            // gender removed from card UI
+            
+            // Calculate attendance percentage across the academic year (Sun-Thu)
+            const presentDays = calculateStudentPresentDaysInAcademicYear(student.name);
+            const totalSchoolDays = calculateTotalSchoolDays() - calculateStudentExcusedDaysInAcademicYear(student.name);
+            const attendancePercentage = totalSchoolDays > 0 
+                ? Math.round((presentDays / totalSchoolDays) * 100)
+                : 100;
+            
+            document.getElementById('card-student-attendance').textContent = `${attendancePercentage}%`;
+            
+            // grades removed from card UI
+            
+            // Notes
+            document.getElementById('card-student-notes').value = student.notes || '';
+            
+            // Show modal
+            document.getElementById('student-card-modal').style.display = 'flex';
+        }
+
+        function closeStudentCard() {
+            document.getElementById('student-card-modal').style.display = 'none';
+            currentCardStudent = null;
+        }
+
+        function saveStudentNotes() {
+            if (!currentCardStudent) return;
+            
+            const student = students.find(s => s.name === currentCardStudent);
+            if (student) {
+                student.notes = document.getElementById('card-student-notes').value;
+                saveData();
+                showToast('تم حفظ الملاحظات بنجاح', 'success');
+            }
+        }
+
+function editStudentFromCard() {
+    if (!currentCardStudent) return;
+    const student = students.find(s => s.name === currentCardStudent);
+    if (student) {
+        closeStudentCard();
+        editStudent(student.name);
+    }
+}
+
+
+
+        function deleteStudentFromCard() {
+            if (!currentCardStudent) return;
+            
+            if (confirm(`هل أنت متأكد من حذف الطالب "${currentCardStudent}"؟`)) {
+                students = students.filter(s => s.name !== currentCardStudent);
+                
+                // Remove attendance data
+                Object.keys(attendanceData).forEach(date => {
+                    if (attendanceData[date][currentCardStudent]) {
+                        delete attendanceData[date][currentCardStudent];
+                    }
+                });
+                
+                saveData();
+                updateDashboard();
+                updateStudentsTable();
+                updateGradesTable();
+                closeStudentCard();
+                showToast('تم حذف الطالب بنجاح', 'success');
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('student-card-modal');
+            if (e.target === modal) {
+                closeStudentCard();
+            }
+        });
+
+        // ...existing code...
+function checkPassword() {
+    const password = document.getElementById('page-password').value;
+    // يمكنك تغيير كلمة المرور هنا
+    const correct = "123456";
+    if (password === correct) {
+        document.getElementById('password-overlay').style.display = 'none';
+    } else {
+        document.getElementById('password-error').style.display = 'block';
+    }
+}
+document.getElementById('page-password').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        checkPassword();
+    }
+});
+    </script>
+</body>
+</html>
