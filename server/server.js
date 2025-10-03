@@ -23,11 +23,13 @@ db.once('open', () => console.log('تم الاتصال بقاعدة البيان
 const studentsRouter = require('./routes/students');
 const attendanceRouter = require('./routes/attendance');
 const settingsRouter = require('./routes/settings');
+const backupRouter = require('./routes/backup');
 
 // استخدام المسارات
 app.use('/api/students', studentsRouter);
 app.use('/api/attendance', attendanceRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/backup', backupRouter);
 
 // معالجة الأخطاء
 app.use((err, req, res, next) => {

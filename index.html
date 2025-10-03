@@ -1953,25 +1953,24 @@
                 </div>
             </div>
 
-            <div class="controls">
-                <h3>النسخ الاحتياطي واستعادة البيانات</h3>
-                <div class="controls-row">
-                    <button class="btn btn-success" onclick="exportBackup()">
-                        📥 نسخ احتياطي
-                    </button>
-                    <button class="btn btn-warning" onclick="document.getElementById('restore-file').click()">
-                        📤 استعادة البيانات
-                    </button>
-                    <button class="btn btn-danger" onclick="clearAllData()">
-                        🗑️ مسح كل البيانات
-                    </button>
-                    <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="importBackup(event)">
-                </div>
-                <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-right: 4px solid #ff6b6b;">
-                    <p><strong>تنبيه:</strong> يُنصح بعمل نسخة احتياطية قبل القيام بأي عمليات مسح أو استعادة للبيانات.</p>
-                </div>
-            </div>
-        </div>
+<div class="form-group">
+    <h3>نسخ احتياطي للبيانات</h3>
+    <div class="controls-row">
+        <button class="btn btn-primary" onclick="exportData()">
+            💾 تصدير البيانات
+        </button>
+        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
+        <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">
+            📥 استيراد البيانات
+        </button>
+        <button class="btn btn-danger" onclick="clearAllData()">
+            🗑️ مسح كل البيانات
+        </button>
+    </div>
+    <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-right: 4px solid #ff6b6b;">
+        <p><strong>تنبيه:</strong> يُنصح بعمل نسخة احتياطية قبل القيام بأي عمليات مسح أو استعادة للبيانات.</p>
+    </div>
+</div>
     </main>
 
     <!-- Footer -->
@@ -4335,6 +4334,131 @@ function generateSuccessCertificate(student) {
             </div>
         </div>
     `;
+}
+
+// تصدير البيانات
+// تصدير البيانات
+async function exportData() {
+    try {
+        showToast('جاري تحضير البيانات...', 'info');
+        const exportData = {
+            students: students,
+            attendanceData: attendanceData,
+            settings: settings,
+            graduatedStudents: graduatedStudents,
+            exportDate: new Date().toISOString(),
+            version: '1.0'
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `school_backup_${new Date().toLocaleDateString('ar-EG')}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showToast('تم تصدير البيانات بنجاح', 'success');
+    } catch (err) {
+        console.error('خطأ في تصدير البيانات:', err);
+        showToast('حدث خطأ أثناء تصدير البيانات', 'error');
+    }
+}
+
+// استيراد البيانات
+async function importData(event) {
+    try {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.json')) {
+            showToast('الرجاء اختيار ملف JSON صحيح', 'error');
+            return;
+        }
+
+        showToast('جاري قراءة الملف...', 'info');
+        const reader = new FileReader();
+
+        reader.onload = async function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // التحقق من صحة البيانات
+                if (!data.students || !Array.isArray(data.students)) {
+                    throw new Error('تنسيق الملف غير صحيح');
+                }
+
+                // حفظ البيانات
+                students = data.students;
+                attendanceData = data.attendanceData || {};
+                settings = data.settings || settings;
+                graduatedStudents = data.graduatedStudents || [];
+
+                // حفظ في التخزين المحلي
+                saveData();
+
+                // تحديث الواجهة
+                updateDashboard();
+                updateStudentsTable();
+                showToast('تم استيراد البيانات بنجاح', 'success');
+                
+                // إعادة تحميل الصفحة بعد ثانية
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (err) {
+                console.error('خطأ في معالجة الملف:', err);
+                showToast('الملف غير صالح أو تالف', 'error');
+            }
+        };
+
+        reader.onerror = function() {
+            showToast('فشل في قراءة الملف', 'error');
+        };
+
+        reader.readAsText(file);
+    } catch (err) {
+        console.error('خطأ في استيراد البيانات:', err);
+        showToast('حدث خطأ أثناء استيراد البيانات', 'error');
+    }
+}
+
+// استيراد البيانات
+async function importData(event) {
+    try {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                const response = await fetch('https://school-nine-sable.vercel.app/api/backup/import', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showToast('تم استيراد البيانات بنجاح', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    throw new Error('فشل استيراد البيانات');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('حدث خطأ أثناء استيراد البيانات', 'error');
+            }
+        };
+        reader.readAsText(file);
+    } catch (err) {
+        console.error(err);
+        showToast('حدث خطأ أثناء قراءة الملف', 'error');
+    }
 }
 
     </script>
