@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة شؤون الطلاب</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+        import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
+
+        // تكوين Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCqqEu0G1rss9Qh__PYp50iXVby0_kLLE8",
+            authDomain: "students-data-4e124.firebaseapp.com",
+            projectId: "students-data-4e124",
+            storageBucket: "students-data-4e124.firebasestorage.app",
+            messagingSenderId: "1054134348411",
+            appId: "1:1054134348411:web:020594a563e5bb193e90de",
+            measurementId: "G-BCNQ7M9GC3",
+            databaseURL: "https://students-data-4e124-default-rtdb.firebaseio.com" // أضف هذا السطر
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // جعل وظائف Firebase متاحة عالمياً
+        window.firebaseApp = app;
+        window.initFirebase = initializeApp;
+        window.getDatabase = getDatabase;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbGet = get;
+        window.dbChild = child;
+        window.dbOnValue = onValue;
+    </script>
+    <script src="firebase-api.js"></script>
 
     <style>
         * {
@@ -2147,7 +2180,7 @@
         }
 
         // Ensure data persistence on unload
-        window.addEventListener('beforeunload', function() {
+        window.addEventListener('beforeunload', async function() {
             try { saveData(); } catch (e) {}
         });
 
@@ -2454,7 +2487,7 @@ function showClasses(grade) {
                         </div>
                         <div class="info-item">
                             <h4>تاريخ الميلاد</h4>
-                            <p>${student.birthDate}</p>
+                            <p>${(student.birthDate || '').replace(/-/g, '/')}</p>
                         </div>
                     </div>
 
@@ -2718,7 +2751,7 @@ function updateClassFilter() {
                         <td><a href="#" class="student-link" onclick="showStudentCard('${student.name}')">${student.name}</a></td>
                         <td>${getGradeName(student.grade)}</td>
                         <td>فصل ${student.class}</td>
-                        <td>${student.birthDate}</td>
+                        <td>${(student.birthDate || '').replace(/-/g, '/')}</td>
                         <td>${student.parentPhone}</td>
                         <td>${student.nationalId}</td>
                        <td>
@@ -2744,7 +2777,7 @@ function updateClassFilter() {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            });
+            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         function filterStudents() {
@@ -2860,7 +2893,7 @@ function updateClassFilter() {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            });
+            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         function filterAttendance() {
@@ -3165,7 +3198,7 @@ return `
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            });
+            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         function filterGrades() {
@@ -3471,7 +3504,7 @@ function exportGradesSemester(semester) {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            });
+            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
         }
 
         // Certificate functions
@@ -3505,7 +3538,7 @@ function updateCertificateClasses() {
             if (grade && classNum) {
                 const filteredStudents = students.filter(s => 
                     s.grade == grade && s.class == classNum && s.status === 'active'
-                );
+                ).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
                 
                 filteredStudents.forEach(student => {
                     const option = document.createElement('option');
@@ -3558,13 +3591,13 @@ function generateCertificate() {
                 document.getElementById('efada-student-name').textContent = student.name;
                 document.getElementById('efada-student-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
                 document.getElementById('efada-academic-year').textContent = academicYear;
-                document.getElementById('efada-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+                document.getElementById('efada-birth-date').textContent = (student.birthDate || '').replace(/-/g, '/');
                 document.getElementById('efada-issue-date').textContent = today;
                 
             } else if (certType === 'bayan') {
                 document.getElementById('bayan-student-name').textContent = student.name;
                 document.getElementById('bayan-student-grade').textContent = getGradeName(student.grade);
-                document.getElementById('bayan-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+                document.getElementById('bayan-birth-date').textContent = (student.birthDate || '').replace(/-/g, '/');
                 document.getElementById('bayan-academic-year').textContent = academicYear;
                 document.getElementById('bayan-issue-date').textContent = today;
                 document.getElementById('bayan-next-grade').textContent = student.grade < 3 ? getGradeName(parseInt(student.grade) + 1) : 'المرحلة الثانوية';
@@ -4141,7 +4174,7 @@ document.getElementById('reports-grade').addEventListener('change', function() {
             document.getElementById('card-student-id').textContent = student.nationalId;
             document.getElementById('card-student-grade').textContent = getGradeName(student.grade);
             document.getElementById('card-student-class').textContent = `فصل ${student.class}`;
-            document.getElementById('card-student-birth').textContent = student.birthDate || 'غير محدد';
+            document.getElementById('card-student-birth').textContent = (student.birthDate || '').replace(/-/g, '/') || 'غير محدد';
             // gender removed from card UI
             
             // Calculate attendance percentage across the academic year (Sun-Thu)
