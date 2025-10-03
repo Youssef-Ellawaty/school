@@ -2183,37 +2183,47 @@
             try { saveData(); } catch (e) {}
         });
 
-        function loadData() {
-            const saved = localStorage.getItem('studentManagementData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                students = data.students || students;
-                // Fix grade structure for existing students
-                students.forEach(student => {
-                    if (!student.grades.semester1) {
-                        student.grades = {
-                            semester1: {
-                                arabic: student.grades.arabic || null,
-                                math: student.grades.math || null,
-                                science: student.grades.science || null,
-                                english: student.grades.english || null,
-                                social: student.grades.social || null
-                            },
-                            semester2: {
-                                arabic: null,
-                                math: null,
-                                science: null,
-                                english: null,
-                                social: null
-                            }
-                        };
-                    }
-                });
-                settings = data.settings || settings;
-                attendanceData = data.attendanceData || {};
-                graduatedStudents = data.graduatedStudents || [];
-            }
-        }
+// تحميل البيانات من الملف
+async function loadData() {
+    try {
+        const response = await fetch('https://school-nine-sable.vercel.app/api/data');
+        const data = await response.json();
+        
+        students = data.students;
+        attendanceData = data.attendanceData;
+        settings = data.settings;
+        graduatedStudents = data.graduatedStudents;
+        
+        updateDashboard();
+        updateStudentsTable();
+    } catch (err) {
+        console.error('خطأ في تحميل البيانات:', err);
+        showToast('حدث خطأ في تحميل البيانات', 'error');
+    }
+}
+
+// حفظ البيانات إلى الملف
+async function saveData() {
+    try {
+        const data = {
+            students,
+            attendanceData,
+            settings,
+            graduatedStudents
+        };
+        
+        await fetch('https://school-nine-sable.vercel.app/api/data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    } catch (err) {
+        console.error('خطأ في حفظ البيانات:', err);
+        showToast('حدث خطأ في حفظ البيانات', 'error');
+    }
+}
         
         // Tab navigation
         function showTab(tabName) {

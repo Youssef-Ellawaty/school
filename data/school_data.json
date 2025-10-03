@@ -1,0 +1,11 @@
+{
+  "students": [],
+  "attendanceData": {},
+  "settings": {
+    "academicStart": "2025-09-01",
+    "academicEnd": "2026-05-31",
+    "schoolName": "مدرسة الشهيد حمدي إبراهيم الإعدادية بنين",
+    "password": "123456"
+  },
+  "graduatedStudents": []
+}
