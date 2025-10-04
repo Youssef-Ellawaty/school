@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة شؤون الطلاب - نسخة ثابتة</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- نفس محتوى index.html -->
+    <script>
+    // نظام إدارة البيانات المحلية
+    const storage = {
+        saveData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('خطأ في حفظ البيانات:', error);
+                return false;
+            }
+        },
+        
+        getData(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.error('خطأ في قراءة البيانات:', error);
+                return null;
+            }
+        },
+
+        clearData() {
+            try {
+                localStorage.clear();
+                return true;
+            } catch (error) {
+                console.error('خطأ في مسح البيانات:', error);
+                return false;
+            }
+        }
+    };
+
+    // البيانات الافتراضية
+    const defaultData = {
+        settings: {
+            academicStart: '2025-09-01',
+            academicEnd: '2026-05-31',
+            schoolName: 'مدرسة الشهيد حمدي إبراهيم الإعدادية بنين',
+            schoolLogo: 'logo1.png'
+        },
+        students: [],
+        attendanceData: {},
+        graduatedStudents: []
+    };
+
+    // تهيئة البيانات
+    let students = storage.getData('students') || defaultData.students;
+    let settings = storage.getData('settings') || defaultData.settings;
+    let attendanceData = storage.getData('attendanceData') || defaultData.attendanceData;
+    let graduatedStudents = storage.getData('graduatedStudents') || defaultData.graduatedStudents;
+
+    // وظائف إدارة البيانات
+    function saveData() {
+        storage.saveData('students', students);
+        storage.saveData('settings', settings);
+        storage.saveData('attendanceData', attendanceData);
+        storage.saveData('graduatedStudents', graduatedStudents);
+    }
+
+    function loadData() {
+        students = storage.getData('students') || defaultData.students;
+        settings = storage.getData('settings') || defaultData.settings;
+        attendanceData = storage.getData('attendanceData') || defaultData.attendanceData;
+        graduatedStudents = storage.getData('graduatedStudents') || defaultData.graduatedStudents;
+        
+        updateDashboard();
+        updateStudentsTable();
+        setCurrentDate();
+    }
+
+    // حفظ البيانات تلقائياً عند أي تغيير
+    function autoSave() {
+        saveData();
+    }
+
+    // تصدير البيانات كنسخة احتياطية
+    function exportBackup() {
+        const backup = {
+            students,
+            settings,
+            attendanceData,
+            graduatedStudents,
+            exportDate: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "school_backup_" + new Date().toISOString().split('T')[0] + ".json";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // استيراد نسخة احتياطية
+    async function importBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const backup = JSON.parse(text);
+            
+            if (backup.students && backup.settings && backup.attendanceData) {
+                students = backup.students;
+                settings = backup.settings;
+                attendanceData = backup.attendanceData;
+                graduatedStudents = backup.graduatedStudents || [];
+                
+                saveData();
+                loadData();
+                showToast('تم استيراد النسخة الاحتياطية بنجاح', 'success');
+            } else {
+                showToast('ملف النسخة الاحتياطية غير صالح', 'error');
+            }
+        } catch (error) {
+            console.error('خطأ في استيراد النسخة الاحتياطية:', error);
+            showToast('حدث خطأ أثناء استيراد النسخة الاحتياطية', 'error');
+        }
+    }
+
+    // تحميل البيانات عند بدء التطبيق
+    document.addEventListener('DOMContentLoaded', loadData);
+
+    // حفظ البيانات عند إغلاق التطبيق
+    window.addEventListener('beforeunload', saveData);
+
+</script>
+</body>
+</html>

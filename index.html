@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام إدارة شؤون الطلاب</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="app.js"></script>
     <style>
         * {
             margin: 0;
@@ -1191,107 +1190,17 @@
         }
     </style>
     <style media="print">
-        /* Print-only styles */
-        @page {
-            size: A4;
-            margin: 0;
-        }
-        
+        /* Print-only styles for attendance PDF */
         body * { visibility: hidden; }
-        
-        /* Attendance print styles */
         #attendance, #attendance * { visibility: visible; }
         #attendance { position: absolute; left: 0; top: 0; width: 100%; }
-        
-        /* Certificate print styles */
-        #certificate-preview, #certificate-preview * { visibility: visible !important; }
-        #certificate-preview { 
-            position: absolute; 
-            left: 0; 
-            top: 0; 
-            width: 100%;
-            background: white !important;
-        }
-        .certificate-container { 
-            margin: 0 auto;
-            box-shadow: none !important;
-            background: white !important;
-            width: 21cm !important;
-            min-height: 29.7cm !important;
-        }
-        .certificate-quarter {
-            border: 1px solid #000 !important;
-            background: white !important;
-            color: black !important;
-        }
-        
-        /* Hide UI elements in print */
-        .btn, .nav-tabs, .theme-toggle, .header, .controls, .footer { display: none !important; }
-        
-        /* Table print styles */
-        .table { border: 1px solid #000 !important; }
-        .table th, .table td { 
-            border: 1px solid #000 !important; 
-            color: #000 !important;
-            background: white !important;
-        }
-        .table th { background: #f5f5f5 !important; }
+        /* Hide buttons in print */
+        .btn, .nav-tabs, .theme-toggle, .header { display: none !important; }
+        /* Improve table print readability */
+        .table { border: 1px solid #000; }
+        .table th, .table td { border: 1px solid #000 !important; color: #000 !important; }
+        .table th { background: #eee !important; }
         .student-status { color: #000 !important; background: none !important; border: 1px solid #000; }
-    </style>
-    <style>
-@media print {
-    @page {
-        size: A4;
-        margin: 2cm;
-    }
-    body {
-        margin: 0;
-        padding: 0;
-        background: white;
-        font-family: 'Traditional Arabic', 'Times New Roman', serif;
-    }
-    #certificate-container {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        direction: rtl;
-        background: white;
-    }
-    .certificate-header {
-        text-align: center;
-        margin-bottom: 1cm;
-    }
-    .certificate-header h3 {
-        margin: 0.2cm 0;
-    }
-    .certificate-title {
-        text-align: center;
-        margin: 1cm 0;
-        font-size: 24px;
-    }
-    .certificate-content {
-        line-height: 1.8;
-    }
-    .certificate-content p {
-        margin: 0.3cm 0;
-    }
-    .grades-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 0.5cm;
-    }
-    .grades-table th,
-    .grades-table td {
-        border: 1px solid black;
-        padding: 8px;
-        text-align: center;
-    }
-    .signature-section {
-        margin-top: 2cm;
-        display: flex;
-        justify-content: space-between;
-    }
-}
     </style>
 </head>
 <body>
@@ -1339,7 +1248,7 @@
             </button>
             <button class="nav-tab" onclick="showTab('certificates')">
                 <span class="nav-tab-icon">🏆</span>
-                <span class="nav-tab-text">الإفادات وبيان النجاح</span>
+                <span class="nav-tab-text">الإفادات</span>
             </button>
             <button class="nav-tab" onclick="showTab('settings')">
                 <span class="nav-tab-icon">⚙️</span>
@@ -1586,12 +1495,10 @@
                         <option value="2">الفصل الدراسي الثاني</option>
                     </select>
                 </div>
-                <div class="controls-row">
-                    <button class="btn btn-warning" onclick="document.getElementById('import-grades-file').click()">
-                        📥 استيراد درجات من Excel
-                    </button>
-                    <input type="file" id="import-grades-file" accept=".xlsx,.xls" style="display: none;" onchange="importGradesFromExcel(event)">
-                </div>
+                <button class="btn btn-warning" onclick="document.getElementById('import-grades-file').click()">
+        📥 استيراد درجات من Excel
+    </button>
+    <input type="file" id="import-grades-file" accept=".xlsx,.xls" style="display: none;" onchange="importGradesFromExcel(event)">
             </div>
 
             <div class="table-responsive">
@@ -1695,14 +1602,6 @@
             <div class="controls">
                 <div class="controls-row">
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label>نوع الشهادة:</label>
-                        <select id="cert-type" class="form-control" onchange="updateCertificateView()" style="max-width: 200px;">
-                            <option value="">اختر نوع الشهادة</option>
-                            <option value="efada">إفادة</option>
-                            <option value="bayan">بيان نجاح</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
                         <label>الصف:</label>
                         <select id="cert-grade" class="form-control" onchange="updateCertificateClasses()" style="max-width: 200px;">
                             <option value="">اختر الصف</option>
@@ -1726,137 +1625,47 @@
                 </div>
                 <div class="controls-row">
                     <button class="btn btn-primary" onclick="generateCertificate()">
-                        📄 طباعة الشهادة
+                        📄 طباعة
                     </button>
                     <button class="btn btn-success" onclick="downloadCertificatePDF()">
                         📥 تحميل PDF
                     </button>
                     <button class="btn btn-warning" onclick="previewCertificate()">
-                        👁️ معاينة الشهادة
+                        👁️ معاينة الإفادة
                     </button>
                 </div>
             </div>
 
             <div id="certificate-preview" style="display: none; margin-top: 2rem;">
-                <!-- إفادة -->
-                <div id="efada-template" class="certificate-container" style="display: none;">
+                <div class="certificate-container">
                     <div class="certificate-quarter">
                         <div class="certificate-header">
                             <h2>مديرية التربية والتعليم بكفر الشيخ</h2>
                             <h3>إدارة شرق كفر الشيخ التعليمية</h3>
                             <h3>مدرسة الشهيد حمدي الاعدادية بنين</h3>
                             <hr style="margin: 1rem 0; border: 1px solid #333;">
-                            <h2 style="margin-top: 1rem;">إفادة</h2>
                         </div>
                         <div class="certificate-content">
                             <div class="certificate-row">
                                 <span>اسم الطالب:</span>
-                                <span id="efada-student-name"></span>
+                                <span id="cert-student-name">يوسف أحمد راضي التواتي</span>
                             </div>
                             <div class="certificate-row">
                                 <span>الصف:</span>
-                                <span id="efada-student-grade"></span>
+                                <span id="cert-student-grade">الصف الأول الإعدادي - فصل 1</span>
                                 <span>العام الدراسي:</span>
-                                <span id="efada-academic-year"></span>
+                                <span id="cert-academic-year">2024-2025</span>
                             </div>
                             <div class="certificate-row">
                                 <span>تاريخ الميلاد:</span>
-                                <span id="efada-birth-date"></span>
+                                <span id="cert-birth-date">2009/7/1</span>
                                 <span>تاريخ التحرير:</span>
-                                <span id="efada-issue-date"></span>
+                                <span id="cert-issue-date">2025/7/30</span>
                             </div>
                         </div>
                         <div class="certificate-footer">
                             <span>شؤون الطلبة</span>
                             <span>يعتمد مدير المدرسة</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- بيان نجاح -->
-                <div id="bayan-template" class="certificate-container" style="display: none;">
-                    <div class="certificate-quarter">
-                        <div class="certificate-header">
-                            <h2>محافظة كفر الشيخ</h2>
-                            <h3>مديرية التربية والتعليم بكفر الشيخ</h3>
-                            <h3>إدارة شرق كفر الشيخ التعليمية</h3>
-                            <h3>مدرسة الشهيد حمدي الاعدادية بنين</h3>
-                            <hr style="margin: 1rem 0; border: 1px solid #333;">
-                            <h2 style="margin-top: 1rem;">بيان نجاح بالدرجات</h2>
-                        </div>
-                        <div class="certificate-content">
-                            <div class="certificate-row">
-                                <span>اسم الطالب:</span>
-                                <span id="bayan-student-name"></span>
-                            </div>
-                            <div class="certificate-row">
-                                <span>مقيد بالصف:</span>
-                                <span id="bayan-student-grade"></span>
-                            </div>
-                            <div class="certificate-row">
-                                <span>تاريخ الميلاد:</span>
-                                <span id="bayan-birth-date"></span>
-                            </div>
-                            <div class="certificate-row">
-                                <span>العام الدراسي:</span>
-                                <span id="bayan-academic-year"></span>
-                            </div>
-                            <div class="certificate-row" style="margin-top: 1rem;">
-                                <span>ناجح ومنقول للصف:</span>
-                                <span id="bayan-next-grade"></span>
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <h3 style="margin-bottom: 0.5rem;">وقد حصل على الدرجات التالية:</h3>
-                                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-                                    <tr>
-                                        <th style="border: 1px solid #333; padding: 0.5rem;">المادة</th>
-                                        <th style="border: 1px solid #333; padding: 0.5rem;">النهاية العظمى</th>
-                                        <th style="border: 1px solid #333; padding: 0.5rem;">درجة الطالب</th>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">اللغة العربية</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-arabic-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-arabic-grade"></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">اللغة الإنجليزية</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-english-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-english-grade"></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">الرياضيات</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-math-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-math-grade"></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">العلوم</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-science-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-science-grade"></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">الدراسات الاجتماعية</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-social-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-social-grade"></td>
-                                    </tr>
-                                    <tr>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;">المجموع</td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-total-max"></td>
-                                        <td style="border: 1px solid #333; padding: 0.5rem;" id="bayan-total-grade"></td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="certificate-footer" style="margin-top: 2rem;">
-                            <div>
-                                <span>شؤون الطلبة</span>
-                                <br>
-                                <span>يعتمد،، مدير المدرسة</span>
-                            </div>
-                            <div style="text-align: center;">
-                                <span>تحريراً في:</span>
-                                <br>
-                                <span id="bayan-issue-date"></span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1920,24 +1729,25 @@
                 </div>
             </div>
 
-<div class="form-group">
-    <h3>نسخ احتياطي للبيانات</h3>
-    <div class="controls-row">
-        <button class="btn btn-primary" onclick="exportData()">
-            💾 تصدير البيانات
-        </button>
-        <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
-        <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">
-            📥 استيراد البيانات
-        </button>
-        <button class="btn btn-danger" onclick="clearAllData()">
-            🗑️ مسح كل البيانات
-        </button>
-    </div>
-    <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-right: 4px solid #ff6b6b;">
-        <p><strong>تنبيه:</strong> يُنصح بعمل نسخة احتياطية قبل القيام بأي عمليات مسح أو استعادة للبيانات.</p>
-    </div>
-</div>
+            <div class="controls">
+                <h3>النسخ الاحتياطي واستعادة البيانات</h3>
+                <div class="controls-row">
+                    <button class="btn btn-success" onclick="exportBackup()">
+                        📥 نسخ احتياطي
+                    </button>
+                    <button class="btn btn-warning" onclick="document.getElementById('restore-file').click()">
+                        📤 استعادة البيانات
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllData()">
+                        🗑️ مسح كل البيانات
+                    </button>
+                    <input type="file" id="restore-file" accept=".json" style="display: none;" onchange="importBackup(event)">
+                </div>
+                <div style="background: rgba(255, 107, 107, 0.1); padding: 1rem; border-radius: 10px; margin-top: 1rem; border-right: 4px solid #ff6b6b;">
+                    <p><strong>تنبيه:</strong> يُنصح بعمل نسخة احتياطية قبل القيام بأي عمليات مسح أو استعادة للبيانات.</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -2151,19 +1961,34 @@
         });
 
         function loadData() {
-            try {
-                const savedData = localStorage.getItem('studentManagementData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    students = data.students || students;
-                    attendanceData = data.attendanceData || attendanceData;
-                    settings = data.settings || settings;
-                    graduatedStudents = data.graduatedStudents || graduatedStudents;
-                }
-                updateDashboard();
-                updateStudentsTable();
-            } catch (err) {
-                console.error('Error loading data:'  , err);
+            const saved = localStorage.getItem('studentManagementData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                students = data.students || students;
+                // Fix grade structure for existing students
+                students.forEach(student => {
+                    if (!student.grades.semester1) {
+                        student.grades = {
+                            semester1: {
+                                arabic: student.grades.arabic || null,
+                                math: student.grades.math || null,
+                                science: student.grades.science || null,
+                                english: student.grades.english || null,
+                                social: student.grades.social || null
+                            },
+                            semester2: {
+                                arabic: null,
+                                math: null,
+                                science: null,
+                                english: null,
+                                social: null
+                            }
+                        };
+                    }
+                });
+                settings = data.settings || settings;
+                attendanceData = data.attendanceData || {};
+                graduatedStudents = data.graduatedStudents || [];
             }
         }
         
@@ -2438,7 +2263,7 @@ function showClasses(grade) {
                         </div>
                         <div class="info-item">
                             <h4>تاريخ الميلاد</h4>
-                            <p>${(student.birthDate || '').replace(/-/g, '/')}</p>
+                            <p>${student.birthDate}</p>
                         </div>
                     </div>
 
@@ -2702,7 +2527,7 @@ function updateClassFilter() {
                         <td><a href="#" class="student-link" onclick="showStudentCard('${student.name}')">${student.name}</a></td>
                         <td>${getGradeName(student.grade)}</td>
                         <td>فصل ${student.class}</td>
-                        <td>${(student.birthDate || '').replace(/-/g, '/')}</td>
+                        <td>${student.birthDate}</td>
                         <td>${student.parentPhone}</td>
                         <td>${student.nationalId}</td>
                        <td>
@@ -2728,7 +2553,7 @@ function updateClassFilter() {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            });
         }
 
         function filterStudents() {
@@ -2844,7 +2669,7 @@ function updateClassFilter() {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            });
         }
 
         function filterAttendance() {
@@ -3149,7 +2974,7 @@ return `
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            });
         }
 
         function filterGrades() {
@@ -3455,7 +3280,7 @@ function exportGradesSemester(semester) {
                 if (gradeFilter && student.grade != gradeFilter) return false;
                 if (classFilter && student.class != classFilter) return false;
                 return true;
-            }).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            });
         }
 
         // Certificate functions
@@ -3489,7 +3314,7 @@ function updateCertificateClasses() {
             if (grade && classNum) {
                 const filteredStudents = students.filter(s => 
                     s.grade == grade && s.class == classNum && s.status === 'active'
-                ).sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+                );
                 
                 filteredStudents.forEach(student => {
                     const option = document.createElement('option');
@@ -3500,35 +3325,23 @@ function updateCertificateClasses() {
             }
         }
 
-function generateCertificate() {
-    const type = document.getElementById('cert-type').value;
-    const studentName = document.getElementById('cert-student').value;
-    
-    if (!studentName) {
-        alert('يرجى اختيار الطالب');
-        return;
-    }
-
-    const student = students.find(s => s.name === studentName);
-    if (!student) {
-        alert('لم يتم العثور على بيانات الطالب');
-        return;
-    }
-
-    return type === 'نجاح' ? generateSuccessCertificate(student) : '';
-}  
-
-        function calculateTotal(grades) {
-            if (!grades) return '';
-            return Object.values(grades).reduce((sum, grade) => sum + (parseInt(grade) || 0), 0);
+        function generateCertificate() {
+            const studentName = document.getElementById('cert-student').value;
+            if (!studentName) {
+                showToast('يرجى اختيار طالب أولاً', 'error');
+                return;
+            }
+            
+            previewCertificate();
+            setTimeout(() => {
+                window.print();
+            }, 500);
         }
 
         function previewCertificate() {
             const studentName = document.getElementById('cert-student').value;
-            const certType = document.getElementById('cert-type').value;
-            
-            if (!studentName || !certType) {
-                showToast('يرجى اختيار الطالب ونوع الشهادة أولاً', 'error');
+            if (!studentName) {
+                showToast('يرجى اختيار طالب أولاً', 'error');
                 return;
             }
             
@@ -3538,136 +3351,19 @@ function generateCertificate() {
             const today = new Date().toLocaleDateString('ar-EG');
             const academicYear = `${settings.academicStart.split('-')[0]}-${settings.academicEnd.split('-')[0]}`;
             
-            if (certType === 'efada') {
-                document.getElementById('efada-student-name').textContent = student.name;
-                document.getElementById('efada-student-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
-                document.getElementById('efada-academic-year').textContent = academicYear;
-                document.getElementById('efada-birth-date').textContent = (student.birthDate || '').replace(/-/g, '/');
-                document.getElementById('efada-issue-date').textContent = today;
-                
-            } else if (certType === 'bayan') {
-                document.getElementById('bayan-student-name').textContent = student.name;
-                document.getElementById('bayan-student-grade').textContent = getGradeName(student.grade);
-                document.getElementById('bayan-birth-date').textContent = (student.birthDate || '').replace(/-/g, '/');
-                document.getElementById('bayan-academic-year').textContent = academicYear;
-                document.getElementById('bayan-issue-date').textContent = today;
-                document.getElementById('bayan-next-grade').textContent = student.grade < 3 ? getGradeName(parseInt(student.grade) + 1) : 'المرحلة الثانوية';
-                
-                // Set grades
-                const subjects = ['arabic', 'english', 'math', 'science', 'social'];
-                let total = 0;
-                let totalMax = 0;
-                
-                subjects.forEach(subject => {
-                    const grade = student.grades?.[subject] || { semester1: 0, semester2: 0 };
-                    const maxGrade = 100;
-                    const finalGrade = parseInt(grade.semester1 || 0) + parseInt(grade.semester2 || 0);
-                    
-                    document.getElementById(`bayan-${subject}-grade`).textContent = finalGrade;
-                    document.getElementById(`bayan-${subject}-max`).textContent = maxGrade;
-                    
-                    total += finalGrade;
-                    totalMax += maxGrade;
-                });
-                
-                document.getElementById('bayan-total-grade').textContent = total;
-                document.getElementById('bayan-total-max').textContent = totalMax;
-            }
+            document.getElementById('cert-student-name').textContent = student.name;
+            document.getElementById('cert-student-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
+            document.getElementById('cert-academic-year').textContent = academicYear;
+            document.getElementById('cert-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+            document.getElementById('cert-issue-date').textContent = today;
             
             document.getElementById('certificate-preview').style.display = 'block';
-            document.getElementById('efada-template').style.display = certType === 'efada' ? 'block' : 'none';
-            document.getElementById('bayan-template').style.display = certType === 'bayan' ? 'block' : 'none';
         }
 
-function downloadCertificatePDF() {
-    const type = document.getElementById('cert-type').value;
-    const studentName = document.getElementById('cert-student').value;
-    
-    if (!studentName) {
-        showToast('الرجاء اختيار الطالب', 'error');
-        return;
-    }
-
-    const student = students.find(s => s.name === studentName);
-    if (!student) {
-        showToast('لم يتم العثور على بيانات الطالب', 'error');
-        return;
-    }
-
-    // إعداد الشهادة للطباعة
-    const content = generateCertificate();
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${type === 'نجاح' ? 'بيان نجاح' : 'إفادة'} - ${student.name}</title>
-            <meta charset="UTF-8">
-            <style>
-                @media print {
-                    @page {
-                        size: A4;
-                        margin: 0;
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                    #certificate-container {
-                        width: 21cm;
-                        height: 29.7cm;
-                        margin: 0 auto;
-                        padding: 2cm;
-                        background: white;
-                    }
-                    .certificate-header {
-                        text-align: center;
-                        margin-bottom: 1cm;
-                    }
-                    .certificate-header h3 {
-                        margin: 0.2cm 0;
-                    }
-                    .certificate-title {
-                        text-align: center;
-                        margin: 1cm 0;
-                        font-size: 24px;
-                    }
-                    .certificate-content {
-                        line-height: 1.8;
-                    }
-                    .certificate-content p {
-                        margin: 0.3cm 0;
-                    }
-                    .grades-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin-top: 0.5cm;
-                    }
-                    .grades-table th,
-                    .grades-table td {
-                        border: 1px solid black;
-                        padding: 8px;
-                        text-align: center;
-                    }
-                    .signature-section {
-                        margin-top: 2cm;
-                        display: flex;
-                        justify-content: space-between;
-                    }
-                }
-            </style>
-        </head>
-        <body dir="rtl">
-            ${content}
-            <script>
-                window.onload = function() {
-                    window.print();
-                    window.onfocus = function() { window.close(); }
-                }
-`);
-    printWindow.document.close();
-}
-
+        function downloadCertificatePDF() {
+            previewCertificate();
+            showToast('اختر طباعة ثم حفظ كـ PDF من متصفحك', 'info');
+        }
 
         // Build a simple daily PDF view for class (name, grade, class, status)
         function downloadDailyAttendancePDF() {
@@ -4125,7 +3821,7 @@ document.getElementById('reports-grade').addEventListener('change', function() {
             document.getElementById('card-student-id').textContent = student.nationalId;
             document.getElementById('card-student-grade').textContent = getGradeName(student.grade);
             document.getElementById('card-student-class').textContent = `فصل ${student.class}`;
-            document.getElementById('card-student-birth').textContent = (student.birthDate || '').replace(/-/g, '/') || 'غير محدد';
+            document.getElementById('card-student-birth').textContent = student.birthDate || 'غير محدد';
             // gender removed from card UI
             
             // Calculate attendance percentage across the academic year (Sun-Thu)
@@ -4219,165 +3915,6 @@ document.getElementById('page-password').addEventListener('keydown', function(e)
         checkPassword();
     }
 });
-
-function generateSuccessCertificate(student) {
-    const grades = student.grades?.semester2 || {};
-    return `
-        <div id="certificate-container" style="padding: 20px; font-family: 'Traditional Arabic', 'Times New Roman', serif; direction: rtl; background-color: white;">
-            <div style="text-align: center;">
-                <p style="margin: 5px 0; font-size: 16pt;">محافظة كفر الشيخ</p>
-                <p style="margin: 5px 0; font-size: 16pt;">مديرية التربية والتعليم بكفر الشيخ</p>
-                <p style="margin: 5px 0; font-size: 16pt;">إدارة شرق كفر الشيخ التعليمية</p>
-                <p style="margin: 5px 0; font-size: 16pt;">مدرسة الشهيد حمدي الإعدادية بنين</p>
-            </div>
-
-            <div style="text-align: center; margin: 20px 0;">
-                <h2 style="font-size: 18pt; font-weight: bold; margin: 0;">بيان نجاح بالدرجات</h2>
-            </div>
-
-            <div style="margin: 20px 0; line-height: 1.8;">
-                <p>اسم الطالب: ${student.name}</p>
-                <p>مقيد بالصف: ${getGradeName(student.grade)}</p>
-                <p>العام الدراسي: ${student.academicYear || '2025/2026'}</p>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <p style="margin-bottom: 10px;">وقد حصل على الدرجات التالية:</p>
-                <table style="width: 100%; border-collapse: collapse; border: 1px solid black;">
-                    <tr>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;">المادة</th>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">اللغة العربية</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">الرياضيات</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">العلوم</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">اللغة الإنجليزية</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">الدراسات الإجتماعية</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">المجموع</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;">النهاية العظمى</th>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">60</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">60</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">60</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">60</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">60</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">300</td>
-                    </tr>
-                    <tr>
-                        <th style="border: 1px solid black; padding: 8px; text-align: center;">درجة الطالب</th>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${grades.arabic || ''}</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${grades.math || ''}</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${grades.science || ''}</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${grades.english || ''}</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${grades.social || ''}</td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: center;">${calculateTotal(grades)}</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; margin-top: 80px;">
-                <div style="text-align: center;">
-                    <p style="margin-bottom: 40px;">شئون الطلبة</p>
-                    <p>_____________</p>
-                </div>
-                <div style="text-align: center;">
-                    <p style="margin-bottom: 40px;">مدير المدرسة</p>
-                    <p>_____________</p>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// تصدير البيانات
-// تصدير البيانات
-async function exportData() {
-    try {
-        showToast('جاري تحضير البيانات...', 'info');
-        const exportData = {
-            students: students,
-            attendanceData: attendanceData,
-            settings: settings,
-            graduatedStudents: graduatedStudents,
-            exportDate: new Date().toISOString(),
-            version: '1.0'
-        };
-
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `school_backup_${new Date().toLocaleDateString('ar-EG')}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-
-        showToast('تم تصدير البيانات بنجاح', 'success');
-    } catch (err) {
-        console.error('خطأ في تصدير البيانات:', err);
-        showToast('حدث خطأ أثناء تصدير البيانات', 'error');
-    }
-}
-
-// استيراد البيانات
-async function importData(event) {
-    try {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        if (!file.name.endsWith('.json')) {
-            showToast('الرجاء اختيار ملف JSON صحيح', 'error');
-            return;
-        }
-
-        showToast('جاري قراءة الملف...', 'info');
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                
-                // التحقق من صحة البيانات
-                if (!data.students || !Array.isArray(data.students)) {
-                    throw new Error('تنسيق الملف غير صحيح');
-                }
-
-                // حفظ البيانات
-                students = data.students;
-                attendanceData = data.attendanceData || {};
-                settings = data.settings || settings;
-                graduatedStudents = data.graduatedStudents || [];
-
-                // حفظ في التخزين المحلي
-                saveData();
-
-                // تحديث الواجهة
-                updateDashboard();
-                updateStudentsTable();
-                showToast('تم استيراد البيانات بنجاح', 'success');
-                
-                // إعادة تحميل الصفحة بعد ثانية
-                setTimeout(() => window.location.reload(), 1000);
-            } catch (err) {
-                console.error('خطأ في معالجة الملف:', err);
-                showToast('الملف غير صالح أو تالف', 'error');
-            }
-        };
-
-        reader.onerror = function() {
-            showToast('فشل في قراءة الملف', 'error');
-        };
-
-        reader.readAsText(file);
-    } catch (err) {
-        console.error('خطأ في استيراد البيانات:', err);
-        showToast('حدث خطأ أثناء استيراد البيانات', 'error');
-    }
-}
-
-
     </script>
 </body>
 </html>
