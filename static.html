@@ -132,6 +132,61 @@
         }
     }
 
+    // تعديل دالة تحويل التاريخ لإخراج النتيجة بالشكل yyyy/mm/dd
+    function excelDateToJSDate(serial) {
+        if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            // إذا كان نص تاريخ جاهز (yyyy-mm-dd)
+            return serial.replace(/-/g, '/');
+        }
+        if (typeof serial === 'string' && serial.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+            // إذا كان نص تاريخ جاهز (yyyy/mm/dd)
+            return serial;
+        }
+        if (typeof serial === 'number' && serial > 59) serial -= 1; // Excel leap year bug
+        var utc_days = Math.floor(serial - 25569);
+        var utc_value = utc_days * 86400; // seconds
+        var date_info = new Date(utc_value * 1000);
+        var yyyy = date_info.getUTCFullYear();
+        var mm = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+        var dd = String(date_info.getUTCDate()).padStart(2, '0');
+        return `${yyyy}/${mm}/${dd}`;
+    }
+
+    function updateStudentsTable() {
+        const tbody = document.getElementById('students-table-body');
+        if (!tbody) return;
+        const filteredStudents = students; // أو استخدم الفلترة حسب الحاجة
+        tbody.innerHTML = filteredStudents.map(student => `
+            <tr>
+                <td>${student.name}</td>
+                <td>${student.grade}</td>
+                <td>${student.class}</td>
+                <td>${excelDateToJSDate(student.birthDate)}</td>
+                <td>${student.parentPhone || ''}</td>
+                <td>${student.nationalId || ''}</td>
+                <td>
+                    <button onclick="editStudent('${student.name}')">تعديل</button>
+                    <button onclick="deleteStudent('${student.name}')">حذف</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function showStudentCard(studentName) {
+        const student = students.find(s => s.name === studentName);
+        if (!student) return;
+        
+        document.getElementById('student-card-name').textContent = student.name;
+        document.getElementById('student-card-grade').textContent = student.grade;
+        document.getElementById('student-card-class').textContent = student.class;
+        document.getElementById('student-card-birth').textContent = excelDateToJSDate(student.birthDate) || 'غير محدد';
+        document.getElementById('student-card-phone').textContent = student.parentPhone || 'غير محدد';
+        document.getElementById('student-card-national-id').textContent = student.nationalId || 'غير محدد';
+        
+        // عرض بطاقة الطالب
+        document.getElementById('student-card').style.display = 'block';
+    }
+
     // تحميل البيانات عند بدء التطبيق
     document.addEventListener('DOMContentLoaded', loadData);
 
