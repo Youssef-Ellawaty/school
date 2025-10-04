@@ -187,6 +187,38 @@
         document.getElementById('student-card').style.display = 'block';
     }
 
+    // استيراد بيانات الطلاب من ملف Excel
+    function importStudentsFromExcel(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+            rows.forEach(row => {
+                let birthRaw = row['تاريخ الميلاد'] || row['birthDate'] || '';
+                // معالجة التاريخ مباشرة عند الاستيراد
+                let birthDate = excelDateToJSDate(birthRaw);
+                const student = {
+                    name: row['الاسم'] || row['name'] || '',
+                    grade: row['الصف'] || row['grade'] || '',
+                    class: row['الفصل'] || row['class'] || '',
+                    parentPhone: row['رقم ولي الأمر'] || row['parentPhone'] || '',
+                    nationalId: row['الرقم القومي'] || row['nationalId'] || '',
+                    birthDate: birthDate,
+                };
+                students.push(student);
+            });
+            saveData();
+            updateStudentsTable();
+            showToast('تم استيراد الطلاب بنجاح', 'success');
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
     // تحميل البيانات عند بدء التطبيق
     document.addEventListener('DOMContentLoaded', loadData);
 
