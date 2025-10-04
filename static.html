@@ -200,8 +200,21 @@
             const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
             rows.forEach(row => {
                 let birthRaw = row['تاريخ الميلاد'] || row['birthDate'] || '';
-                // معالجة التاريخ مباشرة عند الاستيراد
-                let birthDate = excelDateToJSDate(birthRaw);
+                // معالجة كل الحالات: رقم، نص رقم، نص تاريخ
+                let birthDate = birthRaw;
+                if (typeof birthRaw === 'number' || (typeof birthRaw === 'string' && /^\d+$/.test(birthRaw))) {
+                    birthDate = excelDateToJSDate(Number(birthRaw));
+                } else if (typeof birthRaw === 'string' && birthRaw.trim() !== '') {
+                    // إذا كان نص تاريخ (yyyy-mm-dd أو yyyy/mm/dd أو d/m/yyyy)
+                    // نحاول تحويله إلى yyyy/mm/dd
+                    let d = new Date(birthRaw.replace(/-/g, '/'));
+                    if (!isNaN(d)) {
+                        let yyyy = d.getFullYear();
+                        let mm = String(d.getMonth() + 1).padStart(2, '0');
+                        let dd = String(d.getDate()).padStart(2, '0');
+                        birthDate = `${yyyy}/${mm}/${dd}`;
+                    }
+                }
                 const student = {
                     name: row['الاسم'] || row['name'] || '',
                     grade: row['الصف'] || row['grade'] || '',
