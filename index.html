@@ -3915,6 +3915,16 @@ document.getElementById('page-password').addEventListener('keydown', function(e)
         checkPassword();
     }
 });
+
+    function deleteAllStudents() {
+        if (confirm('هل أنت متأكد من حذف جميع الطلاب؟')) {
+            students = [];
+            saveData();
+            updateStudentsTable();
+            showToast('تم حذف جميع الطلاب بنجاح', 'success');
+        }
+    }
+ 
     </script>
 </body>
 </html>
