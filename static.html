@@ -232,6 +232,15 @@
         reader.readAsArrayBuffer(file);
     }
 
+    function deleteAllStudents() {
+        if (confirm('هل أنت متأكد من حذف جميع الطلاب؟')) {
+            students = [];
+            saveData();
+            updateStudentsTable();
+            showToast('تم حذف جميع الطلاب بنجاح', 'success');
+        }
+    }
+
     // تحميل البيانات عند بدء التطبيق
     document.addEventListener('DOMContentLoaded', loadData);
 
