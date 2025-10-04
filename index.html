@@ -2179,51 +2179,26 @@
         }
 
         // Ensure data persistence on unload
-        window.addEventListener('beforeunload', async function() {
+        window.addEventListener('beforeunload', function() {
             try { saveData(); } catch (e) {}
         });
 
-// تحميل البيانات من الملف
-async function loadData() {
-    try {
-        const response = await fetch('https://school-nine-sable.vercel.app/api/data');
-        const data = await response.json();
-        
-        students = data.students;
-        attendanceData = data.attendanceData;
-        settings = data.settings;
-        graduatedStudents = data.graduatedStudents;
-        
-        updateDashboard();
-        updateStudentsTable();
-    } catch (err) {
-        console.error('خطأ في تحميل البيانات:', err);
-        showToast('حدث خطأ في تحميل البيانات', 'error');
-    }
-}
-
-// حفظ البيانات إلى الملف
-async function saveData() {
-    try {
-        const data = {
-            students,
-            attendanceData,
-            settings,
-            graduatedStudents
-        };
-        
-        await fetch('https://school-nine-sable.vercel.app/api/data', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-    } catch (err) {
-        console.error('خطأ في حفظ البيانات:', err);
-        showToast('حدث خطأ في حفظ البيانات', 'error');
-    }
-}
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('studentManagementData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    students = data.students || students;
+                    attendanceData = data.attendanceData || attendanceData;
+                    settings = data.settings || settings;
+                    graduatedStudents = data.graduatedStudents || graduatedStudents;
+                }
+                updateDashboard();
+                updateStudentsTable();
+            } catch (err) {
+                console.error('Error loading data:'  , err);
+            }
+        }
         
         // Tab navigation
         function showTab(tabName) {
@@ -4435,41 +4410,6 @@ async function importData(event) {
     }
 }
 
-// استيراد البيانات
-async function importData(event) {
-    try {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                const response = await fetch('https://school-nine-sable.vercel.app/api/backup/import', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    showToast('تم استيراد البيانات بنجاح', 'success');
-                    setTimeout(() => window.location.reload(), 1000);
-                } else {
-                    throw new Error('فشل استيراد البيانات');
-                }
-            } catch (err) {
-                console.error(err);
-                showToast('حدث خطأ أثناء استيراد البيانات', 'error');
-            }
-        };
-        reader.readAsText(file);
-    } catch (err) {
-        console.error(err);
-        showToast('حدث خطأ أثناء قراءة الملف', 'error');
-    }
-}
 
     </script>
 </body>
