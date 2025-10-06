@@ -3503,6 +3503,24 @@ function updateCertificateClasses() {
             showToast('تم تصدير الملف بنجاح', 'success');
         }
 
+// دالة تحويل تاريخ Excel إلى yyyy/mm/dd
+function excelDateToJSDate(serial) {
+    if (typeof serial === 'string' && serial.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        return serial.replace(/-/g, '/');
+    }
+    if (typeof serial === 'string' && serial.match(/^\d{4}\/\d{2}\/\d{2}$/)) {
+        return serial;
+    }
+    if (typeof serial === 'number' && serial > 59) serial -= 1; // Excel leap year bug
+    var utc_days = Math.floor(serial - 25569);
+    var utc_value = utc_days * 86400; // seconds
+    var date_info = new Date(utc_value * 1000);
+    var yyyy = date_info.getUTCFullYear();
+    var mm = String(date_info.getUTCMonth() + 1).padStart(2, '0');
+    var dd = String(date_info.getUTCDate()).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd}`;
+}
+
 function importFromExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -3517,8 +3535,21 @@ function importFromExcel(event) {
 
             let importedCount = 0;
             jsonData.forEach(row => {
-                // الأعمدة الأساسية المطلوبة فقط
                 if (row['الاسم'] && row['الرقم القومي'] && row['الصف'] && row['الفصل']) {
+                    // معالجة تاريخ الميلاد
+                    let birthRaw = row['تاريخ الميلاد'] || '';
+                    let birthDate = birthRaw;
+                    if (typeof birthRaw === 'number' || (typeof birthRaw === 'string' && /^\d+$/.test(birthRaw))) {
+                        birthDate = excelDateToJSDate(Number(birthRaw));
+                    } else if (typeof birthRaw === 'string' && birthRaw.trim() !== '') {
+                        let d = new Date(birthRaw.replace(/-/g, '/'));
+                        if (!isNaN(d)) {
+                            let yyyy = d.getFullYear();
+                            let mm = String(d.getMonth() + 1).padStart(2, '0');
+                            let dd = String(d.getDate()).padStart(2, '0');
+                            birthDate = `${yyyy}/${mm}/${dd}`;
+                        }
+                    }
                     const student = {
                         name: row['الاسم'],
                         nationalId: row['الرقم القومي'],
@@ -3526,7 +3557,7 @@ function importFromExcel(event) {
                         parentPhone: row['رقم هاتف ولي الأمر'] || '',
                         grade: parseInt(row['الصف']),
                         class: parseInt(row['الفصل']),
-                        birthDate: row['تاريخ الميلاد'] || '',
+                        birthDate: birthDate,
                         attendance: {},
                         grades: {
                             semester1: { arabic: null, math: null, science: null, english: null, social: null },
@@ -3535,8 +3566,6 @@ function importFromExcel(event) {
                         notes: '',
                         status: 'active'
                     };
-
-                    // إذا كان الطالب موجود بنفس الرقم القومي، يتم تحديث بياناته
                     const existingIndex = students.findIndex(s => s.nationalId === student.nationalId);
                     if (existingIndex === -1) {
                         students.push(student);
