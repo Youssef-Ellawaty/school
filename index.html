@@ -1597,10 +1597,17 @@
             </div>
         </div>
 
-        <!-- Certificates Tab -->
-        <div id="certificates" class="tab-content">
+    <!-- الافادات وبيان النجاح -->
+    <div id="certificates" class="tab-content">
             <div class="controls">
                 <div class="controls-row">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>نوع المستند:</label>
+                        <div style="display: flex; gap: 1rem;">
+                            <label><input type="radio" name="cert-type" value="statement" checked onchange="toggleCertificateType('statement')"> إفادة</label>
+                            <label><input type="radio" name="cert-type" value="success" onchange="toggleCertificateType('success')"> بيان نجاح</label>
+                        </div>
+                    </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label>الصف:</label>
                         <select id="cert-grade" class="form-control" onchange="updateCertificateClasses()" style="max-width: 200px;">
@@ -1637,35 +1644,104 @@
             </div>
 
             <div id="certificate-preview" style="display: none; margin-top: 2rem;">
-                <div class="certificate-container">
-                    <div class="certificate-quarter">
-                        <div class="certificate-header">
-                            <h2>مديرية التربية والتعليم بكفر الشيخ</h2>
-                            <h3>إدارة شرق كفر الشيخ التعليمية</h3>
-                            <h3>مدرسة الشهيد حمدي الاعدادية بنين</h3>
-                            <hr style="margin: 1rem 0; border: 1px solid #333;">
+                <div id="statement-preview" style="display: block;">
+                    <div class="certificate-container">
+                        <div class="certificate-quarter">
+                            <div class="certificate-header">
+                                <h2>مديرية التربية والتعليم بكفر الشيخ</h2>
+                                <h3>إدارة شرق كفر الشيخ التعليمية</h3>
+                                <h3>مدرسة الشهيد حمدي الاعدادية بنين</h3>
+                                <hr style="margin: 1rem 0; border: 1px solid #333;">
+                            </div>
+                            <div class="certificate-content">
+                                <div class="certificate-row">
+                                    <span>اسم الطالب:</span>
+                                    <span id="cert-student-name">يوسف أحمد راضي التواتي</span>
+                                </div>
+                                <div class="certificate-row">
+                                    <span>الصف:</span>
+                                    <span id="cert-student-grade">الصف الأول الإعدادي - فصل 1</span>
+                                    <span>العام الدراسي:</span>
+                                    <span id="cert-academic-year">2024-2025</span>
+                                </div>
+                                <div class="certificate-row">
+                                    <span>تاريخ الميلاد:</span>
+                                    <span id="cert-birth-date">2009/7/1</span>
+                                    <span>تاريخ التحرير:</span>
+                                    <span id="cert-issue-date">2025/7/30</span>
+                                </div>
+                            </div>
+                            <div class="certificate-footer">
+                                <span>شؤون الطلبة</span>
+                                <span>يعتمد مدير المدرسة</span>
+                            </div>
                         </div>
-                        <div class="certificate-content">
-                            <div class="certificate-row">
-                                <span>اسم الطالب:</span>
-                                <span id="cert-student-name">يوسف أحمد راضي التواتي</span>
+                    </div>
+                </div>
+                <div id="success-preview" style="display: none;">
+                    <div style="background: #fff; color: #222; padding: 2.5cm 2cm; border-radius: 0; width: 21cm; min-height: 29.7cm; margin: auto; font-family: 'Cairo', 'Arial', sans-serif; position: relative; box-sizing: border-box; box-shadow: 0 0 0.5cm #ccc;">
+                        <div style="text-align: center; margin-bottom: 1.5rem;">
+                            <div style="font-size: 1.2rem;">محافظة كفر الشيخ</div>
+                            <div>مديرية التربية والتعليم بكفر الشيخ</div>
+                            <div>إدارة شرق كفر الشيخ التعليمية</div>
+                            <div>مدرسة الشهيد حمدي إبراهيم الإعدادية بنين</div>
+                        </div>
+                        <h2 style="text-align: center; font-size: 2rem; margin-bottom: 1.5rem;">بيان نجاح </h2>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <div>
+                                <div>اسم الطالب: <span id="success-student-name">يوسف أحمد راضي التواتي</span></div>
+                                <div>تاريخ الميلاد: <span id="success-birth-date">2009/7/1</span></div>
                             </div>
-                            <div class="certificate-row">
-                                <span>الصف:</span>
-                                <span id="cert-student-grade">الصف الأول الإعدادي - فصل 1</span>
-                                <span>العام الدراسي:</span>
-                                <span id="cert-academic-year">2024-2025</span>
-                            </div>
-                            <div class="certificate-row">
-                                <span>تاريخ الميلاد:</span>
-                                <span id="cert-birth-date">2009/7/1</span>
-                                <span>تاريخ التحرير:</span>
-                                <span id="cert-issue-date">2025/7/30</span>
+                            <div>
+                                <div>العام الدراسي: <span id="success-academic-year">2025-2026</span></div>
                             </div>
                         </div>
-                        <div class="certificate-footer">
-                            <span>شؤون الطلبة</span>
-                            <span>يعتمد مدير المدرسة</span>
+                        <div style="margin-bottom: 1rem;">مقيد بالصف: <span id="success-grade">الصف الأول الإعدادي - فصل 1</span></div>
+                        <div style="margin-bottom: 1rem;">ناجح ومنقول للصف: <span id="success-next-grade">الثاني الإعدادي</span></div>
+                        <div style="margin-bottom: 2rem; font-weight: bold;">وقد حصل على الدرجات التالية:</div>
+                        <table style="width: 100%; border-collapse: collapse; background: #fff; color: #222; border: 2px solid #222;">
+                            <thead>
+                                <tr style="background: #333;">
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">المادة</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">اللغة العربية</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">الرياضيات</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">العلوم</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">اللغة الإنجليزية</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">الدراسات الاجتماعية</th>
+                                    <th style="border: 1px solid #222; padding: 8px; background: #eee;">المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="border: 1px solid #222; padding: 8px; text-align: center;">النهاية الكبرى</td>
+                                    <td id="success-arabic-max" style="border: 1px solid #222; text-align: center;">40</td>
+                                    <td id="success-math-max" style="border: 1px solid #222; text-align: center;">30</td>
+                                    <td id="success-science-max" style="border: 1px solid #222; text-align: center;">20</td>
+                                    <td id="success-english-max" style="border: 1px solid #222; text-align: center;">30</td>
+                                    <td id="success-social-max" style="border: 1px solid #222; text-align: center;">20</td>
+                                    <td id="success-total-max" style="border: 1px solid #222; text-align: center;">140</td>
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid #222; padding: 8px; text-align: center;">النهاية الصغرى</td>
+                                    <td id="success-arabic-min" style="border: 1px solid #222; text-align: center;">20</td>
+                                    <td id="success-math-min" style="border: 1px solid #222; text-align: center;">15</td>
+                                    <td id="success-science-min" style="border: 1px solid #222; text-align: center;">10</td>
+                                    <td id="success-english-min" style="border: 1px solid #222; text-align: center;">15</td>
+                                    <td id="success-social-min" style="border: 1px solid #222; text-align: center;">10</td>
+                                    <td id="success-total-min" style="border: 1px solid #222; text-align: center;">70</td>
+                                </tr>
+                                <tr>
+                                    <!-- تم حذف الترتيب بناءً على طلبك -->
+                                </tr>
+                                <tr>
+                                    <td style="border: 1px solid #222; padding: 8px; text-align: center;">درجة الطالب</td>
+                                    <td colspan="6" id="success-status" style="border: 1px solid #222; text-align: center;">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+                            <div>شؤون الطلبة</div>
+                            <div>مدير المدرسة</div>
                         </div>
                     </div>
                 </div>
@@ -1845,7 +1921,7 @@
                 </div>
                 <div class="form-group">
                     <label>رقم هاتف ولي الأمر:</label>
-                    <input type="tel" id="parent-phone" class="form-control" required>
+                    <input type="tel" id="parent-phone" class="form-control">
                 </div>
                 <div class="form-group">
                     <label>الصف:</label>
@@ -1866,6 +1942,7 @@
                     <label>تاريخ الميلاد:</label>
                     <input type="date" id="student-birthdate" class="form-control" required>
                 </div>
+                <!-- تم حذف حقل النوع -->
                 <div class="controls-row">
                     <button type="submit" class="btn btn-primary">💾 حفظ</button>
                     <button type="button" class="btn btn-danger" onclick="closeModal()">إلغاء</button>
@@ -1878,6 +1955,16 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // دالة تبديل نوع المستند بين الإفادة وبيان النجاح
+        function toggleCertificateType(type) {
+            if (type === 'statement') {
+                document.getElementById('statement-preview').style.display = 'block';
+                document.getElementById('success-preview').style.display = 'none';
+            } else {
+                document.getElementById('statement-preview').style.display = 'none';
+                document.getElementById('success-preview').style.display = 'block';
+            }
+        }
         // إدارة البيانات في localStorage
         const storage = {
             saveData(key, data) {
@@ -2110,7 +2197,7 @@ function showClasses(grade) {
             updateClassOptions();
             document.getElementById('student-class').value = student.class;
             document.getElementById('student-birthdate').value = student.birthDate;
-            document.getElementById('student-gender').value = student.gender;
+            // تم حذف تعيين النوع
             
             document.getElementById('student-modal').classList.add('active');
         }
@@ -2402,7 +2489,7 @@ function showClasses(grade) {
                 grade: parseInt(document.getElementById('student-grade').value),
                 class: parseInt(document.getElementById('student-class').value),
                 birthDate: document.getElementById('student-birthdate').value,
-                gender: document.getElementById('student-gender').value,
+                // تم حذف النوع
                 attendance: {},
                 grades: {
                     semester1: {
@@ -2585,11 +2672,22 @@ function updateClassFilter() {
 
         function updateAttendanceTable() {
             const tbody = document.getElementById('attendance-table-body');
-            const date = document.getElementById('attendance-date').value;
-            // Enforce date within academic year
-            const start = new Date(settings.academicStart).toISOString().split('T')[0];
-            const endAcademic = new Date(settings.academicEnd).toISOString().split('T')[0];
-            const today = new Date().toISOString().split('T')[0];
+            const dateStr = document.getElementById('attendance-date').value;
+            const date = new Date(dateStr);
+            // Enforce date within academic year using Date objects
+            const start = new Date(settings.academicStart);
+            const endAcademic = new Date(settings.academicEnd);
+            const today = new Date();
+            // إذا كان التاريخ غير صالح أو فارغ
+            if (isNaN(date.getTime())) {
+                document.getElementById('attendance-title').textContent = 'يرجى اختيار تاريخ صحيح';
+                tbody.innerHTML = '';
+                document.getElementById('daily-present').textContent = 0;
+                document.getElementById('daily-absent').textContent = 0;
+                document.getElementById('daily-total').textContent = 0;
+                document.getElementById('daily-percentage').textContent = '0%';
+                return;
+            }
             if (date < start || date > endAcademic) {
                 document.getElementById('attendance-title').textContent = 'التاريخ خارج نطاق العام الدراسي المحدد';
                 tbody.innerHTML = '';
@@ -2599,6 +2697,7 @@ function updateClassFilter() {
                 document.getElementById('daily-percentage').textContent = '0%';
                 return;
             }
+            // منع تسجيل الحضور في المستقبل
             if (date > today) {
                 document.getElementById('attendance-title').textContent = 'لا يمكن تسجيل الحضور في تاريخ مستقبلي';
                 tbody.innerHTML = '';
@@ -2961,9 +3060,9 @@ return `
         <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 40 : 20}" max="${semester === 'total' ? 40 : 20}" value="${gradesData.science || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'science', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
         <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 60 : 30}" max="${semester === 'total' ? 60 : 30}" value="${gradesData.english || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'english', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
         <td><input type="number" class="form-control" placeholder="0-${semester === 'total' ? 40 : 20}" max="${semester === 'total' ? 40 : 20}" value="${gradesData.social || ''}" style="width: 80px; padding: 0.3rem;" onchange="updateGrade('${student.name}', '${semester}', 'social', this.value)" ${semester === 'total' ? 'readonly' : ''}></td>
-        <td>${semester === 'total' && totalMax > 0 ? totalGrades : (totalMax > 0 ? totalGrades : '-')}</td>
-        <td>${totalMax > 0 ? percentage + '%' : '-'}</td>
-        <td>${student.nationalId}</td>
+    <td>${semester === 'total' && totalMax > 0 ? totalGrades : (totalMax > 0 ? totalGrades : '-')}</td>
+    <td>${totalMax > 0 ? percentage + '%' : '-'}</td>
+    <td>${statusLabel}</td>
     </tr>
 `;
 // ...existing code...
@@ -3367,7 +3466,9 @@ function updateCertificateClasses() {
 
         function downloadCertificatePDF() {
             previewCertificate();
-            showToast('اختر طباعة ثم حفظ كـ PDF من متصفحك', 'info');
+            setTimeout(() => {
+                window.print();
+            }, 500);
         }
 
         // Build a simple daily PDF view for class (name, grade, class, status)
@@ -3404,6 +3505,11 @@ function updateCertificateClasses() {
             settings.academicEnd = document.getElementById('academic-end').value;
             saveData();
             showToast('تم حفظ إعدادات العام الدراسي', 'success');
+            // تحديث جميع عناصر العام الدراسي تلقائياً
+            const academicYear = `${settings.academicStart.split('-')[0]}-${settings.academicEnd.split('-')[0]}`;
+            document.querySelectorAll('[id$="academic-year"]').forEach(function(el) {
+                el.textContent = academicYear;
+            });
             // refresh move-student selector
             populateMoveStudentSelector();
         }
@@ -3678,7 +3784,7 @@ function importFromExcel(event) {
             
             for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
                 const dayOfWeek = date.getDay();
-                // Count Sunday (0) to Thursday (4) as school days
+                // Count only Sunday (0) to Thursday (4) as school days (exclude Fri=5, Sat=6)
                 if (dayOfWeek >= 0 && dayOfWeek <= 4) {
                     totalDays++;
                 }
@@ -3692,10 +3798,14 @@ function importFromExcel(event) {
             let totalRecordedDays = 0;
             
             Object.keys(attendanceData).forEach(date => {
-                if (attendanceData[date][studentName] !== undefined) {
-                    totalRecordedDays++;
-                    if (attendanceData[date][studentName] === 'present') {
-                        presentDays++;
+                const d = new Date(date);
+                const dayOfWeek = d.getDay();
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) { // Sun-Thu only
+                    if (attendanceData[date][studentName] !== undefined) {
+                        totalRecordedDays++;
+                        if (attendanceData[date][studentName] === 'present') {
+                            presentDays++;
+                        }
                     }
                 }
             });
@@ -3719,7 +3829,7 @@ function importFromExcel(event) {
             for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
                 const iso = date.toISOString().split('T')[0];
                 const dayOfWeek = date.getDay();
-                if (dayOfWeek >= 0 && dayOfWeek <= 4) { // Sun-Thu
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) { // Sun-Thu only
                     const state = attendanceData[iso]?.[studentName];
                     // default to present (undefined). Do NOT count excused as present.
                     if (state === 'present' || state === undefined) {
@@ -3739,7 +3849,7 @@ function importFromExcel(event) {
             for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
                 const iso = date.toISOString().split('T')[0];
                 const dayOfWeek = date.getDay();
-                if (dayOfWeek >= 0 && dayOfWeek <= 4) {
+                if (dayOfWeek >= 0 && dayOfWeek <= 4) { // Sun-Thu only
                     if (attendanceData[iso]?.[studentName] === 'excused') excusedDays++;
                 }
             }
@@ -3851,12 +3961,40 @@ document.getElementById('reports-grade').addEventListener('change', function() {
             
             // Fill basic info
             document.getElementById('student-card-name').textContent = `بطاقة الطالب - ${student.name}`;
-            document.getElementById('card-student-name').textContent = student.name;
-            document.getElementById('card-student-id').textContent = student.nationalId;
-            document.getElementById('card-student-grade').textContent = getGradeName(student.grade);
-            document.getElementById('card-student-class').textContent = `فصل ${student.class}`;
-            document.getElementById('card-student-birth').textContent = student.birthDate || 'غير محدد';
-            // gender removed from card UI
+            // تحديد نوع المستند
+            const certType = document.querySelector('input[name="cert-type"]:checked').value;
+            if (certType === 'statement') {
+                document.getElementById('cert-student-name').textContent = student.name;
+                document.getElementById('cert-student-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
+                document.getElementById('cert-academic-year').textContent = academicYear;
+                document.getElementById('cert-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+                document.getElementById('cert-issue-date').textContent = today;
+                document.getElementById('certificate-preview').style.display = 'block';
+                toggleCertificateType('statement');
+            } else {
+                // تعبئة بيانات بيان النجاح
+                document.getElementById('success-student-name').textContent = student.name;
+                document.getElementById('success-birth-date').textContent = new Date(student.birthDate).toLocaleDateString('ar-EG');
+                document.getElementById('success-academic-year').textContent = academicYear;
+                document.getElementById('success-grade').textContent = `${getGradeName(student.grade)} - فصل ${student.class}`;
+                // تقدير الصف التالي
+                let nextGrade = student.grade < 3 ? getGradeName(student.grade + 1) : 'الثانوي';
+                document.getElementById('success-next-grade').textContent = nextGrade;
+                // الدرجات
+                let grades = student.grades?.total || {};
+                document.getElementById('success-arabic').textContent = grades.arabic || '--';
+                document.getElementById('success-math').textContent = grades.math || '--';
+                document.getElementById('success-science').textContent = grades.science || '--';
+                document.getElementById('success-english').textContent = grades.english || '--';
+                document.getElementById('success-social').textContent = grades.social || '--';
+                let total = (grades.arabic||0)+(grades.math||0)+(grades.science||0)+(grades.english||0)+(grades.social||0);
+                document.getElementById('success-total').textContent = total > 0 ? total : '--';
+                // الترتيب ودرجة الطالب
+                document.getElementById('success-rank').textContent = '--';
+                document.getElementById('success-status').textContent = total >= 100 ? 'ناجح' : 'راسب';
+                document.getElementById('certificate-preview').style.display = 'block';
+                toggleCertificateType('success');
+            }
             
             // Calculate attendance percentage across the academic year (Sun-Thu)
             const presentDays = calculateStudentPresentDaysInAcademicYear(student.name);
