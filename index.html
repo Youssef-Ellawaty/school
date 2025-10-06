@@ -2484,7 +2484,12 @@ function updateClassFilter() {
         // Update students table
         function updateStudentsTable() {
             const tbody = document.getElementById('students-table-body');
-            const filteredStudents = getFilteredStudents();
+            // ترتيب أبجدي حسب الاسم
+            const filteredStudents = getFilteredStudents().slice().sort((a, b) => {
+                if (!a.name) return 1;
+                if (!b.name) return -1;
+                return a.name.localeCompare(b.name, 'ar');
+            });
             
             tbody.innerHTML = filteredStudents.map(student => {
             const totalDays = calculateTotalSchoolDays() - calculateStudentExcusedDaysInAcademicYear(student.name);
