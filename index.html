@@ -2484,11 +2484,11 @@ function updateClassFilter() {
         // Update students table
         function updateStudentsTable() {
             const tbody = document.getElementById('students-table-body');
-            // ترتيب أبجدي حسب الاسم
+            // ترتيب أبجدي حسب الاسم (عربي)
             const filteredStudents = getFilteredStudents().slice().sort((a, b) => {
                 if (!a.name) return 1;
                 if (!b.name) return -1;
-                return a.name.localeCompare(b.name, 'ar');
+                return a.name.localeCompare(b.name, 'ar', { sensitivity: 'base' });
             });
             
             tbody.innerHTML = filteredStudents.map(student => {
