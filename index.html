@@ -2700,8 +2700,8 @@ function updateClassFilter() {
 
         function updateAttendanceTable() {
             const tbody = document.getElementById('attendance-table-body');
-            const dateStr = document.getElementById('attendance-date').value;
-            
+            let dateStr = document.getElementById('attendance-date').value;
+            dateStr = new Date(dateStr).toISOString().split('T')[0];
             // تحويل التواريخ إلى كائنات Date
             const date = new Date(dateStr);
             const start = new Date(settings.academicStart);
@@ -2766,7 +2766,7 @@ function updateClassFilter() {
             let excusedCount = 0;
             
             tbody.innerHTML = filteredStudents.map(student => {
-                const attendance = attendanceData[date]?.[student.name];
+                const attendance = attendanceData[dateStr]?.[student.name];
                 const isExcused = attendance === 'excused';
                 const isPresent = attendance === 'present';
                 const isAbsent = attendance === 'absent';
@@ -2836,34 +2836,30 @@ function updateClassFilter() {
         }
 
         function markAllPresent() {
-            const date = document.getElementById('attendance-date').value;
+            let date = document.getElementById('attendance-date').value;
+            date = new Date(date).toISOString().split('T')[0];
             const filteredStudents = getFilteredAttendanceStudents();
-            
             if (!attendanceData[date]) {
                 attendanceData[date] = {};
             }
-            
             filteredStudents.forEach(student => {
                 attendanceData[date][student.name] = 'present';
             });
-            
             saveData();
             updateAttendanceTable();
             showToast('تم تسجيل جميع الطلاب كحاضرين', 'success');
         }
 
         function markAllAbsent() {
-            const date = document.getElementById('attendance-date').value;
+            let date = document.getElementById('attendance-date').value;
+            date = new Date(date).toISOString().split('T')[0];
             const filteredStudents = getFilteredAttendanceStudents();
-            
             if (!attendanceData[date]) {
                 attendanceData[date] = {};
             }
-            
             filteredStudents.forEach(student => {
                 attendanceData[date][student.name] = 'absent';
             });
-            
             saveData();
             updateAttendanceTable();
             showToast('تم تسجيل جميع الطلاب كغائبين', 'warning');
@@ -2872,12 +2868,11 @@ function updateClassFilter() {
         function toggleAttendance(button, status) {
             const row = button.closest('tr');
             const studentName = row.dataset.student;
-            const date = document.getElementById('attendance-date').value;
-            
+            let date = document.getElementById('attendance-date').value;
+            date = new Date(date).toISOString().split('T')[0];
             if (!attendanceData[date]) {
                 attendanceData[date] = {};
             }
-            
             attendanceData[date][studentName] = status;
             saveData();
             updateAttendanceTable();
