@@ -2768,15 +2768,18 @@ function updateClassFilter() {
             tbody.innerHTML = filteredStudents.map(student => {
                 const attendance = attendanceData[date]?.[student.name];
                 const isExcused = attendance === 'excused';
-                const isPresent = attendance === 'present' || attendance === undefined;
+                const isPresent = attendance === 'present';
+                const isAbsent = attendance === 'absent';
                 if (isExcused) {
                     excusedCount++;
                 } else if (isPresent) {
                     presentCount++;
+                } else if (isAbsent) {
+                    absentCount++;
                 } else {
+                    // إذا لم يتم تحديد الحالة نعتبره غائب (أو يمكن تركه فارغ حسب رغبتك)
                     absentCount++;
                 }
-                
                 return `
                     <tr data-student="${student.name}">
                         <td><a href="#" class="student-link" onclick="showStudentCard('${student.name}')">${student.name}</a></td>
