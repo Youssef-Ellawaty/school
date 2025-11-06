@@ -2022,12 +2022,6 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
-            // تأكد من تحميل attendanceData من localStorage إذا كان موجودًا
-            const saved = localStorage.getItem('studentManagementData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                attendanceData = data.attendanceData || {};
-            }
             updateDashboard();
             updateClassOptions();
             setCurrentDate();
