@@ -2077,7 +2077,16 @@
                 attendanceData = data.attendanceData || {};
                 graduatedStudents = data.graduatedStudents || [];
             }
-            
+            // إذا كان العام الدراسي منتهي (تاريخ النهاية أقل من اليوم) يتم تحديثه تلقائياً للعام الحالي
+            const today = new Date();
+            const endAcademic = new Date(settings.academicEnd);
+            if (endAcademic < today) {
+                const nextStart = new Date(today.getFullYear(), 8, 1); // 1 سبتمبر
+                const nextEnd = new Date(today.getFullYear() + 1, 4, 31); // 31 مايو
+                settings.academicStart = nextStart.toISOString().split('T')[0];
+                settings.academicEnd = nextEnd.toISOString().split('T')[0];
+                saveData();
+            }
             // تعيين قيم التواريخ في نموذج الإعدادات
             const academicStartField = document.getElementById('academic-start');
             const academicEndField = document.getElementById('academic-end');
@@ -2725,15 +2734,8 @@ function updateClassFilter() {
 
             // التحقق من أن التاريخ في نطاق العام الدراسي
             if (compareDate < compareStart || compareDate > compareEnd) {
-                const formattedStart = settings.academicStart.split('-').reverse().join('/');
-                const formattedEnd = settings.academicEnd.split('-').reverse().join('/');
-                document.getElementById('attendance-title').textContent = 
-                    `التاريخ خارج نطاق العام الدراسي (${formattedStart} إلى ${formattedEnd})`;
-                tbody.innerHTML = '';
-                document.getElementById('daily-present').textContent = 0;
-                document.getElementById('daily-absent').textContent = 0;
-                document.getElementById('daily-total').textContent = 0;
-                document.getElementById('daily-percentage').textContent = '0%';
+                // اضبط التاريخ تلقائياً إلى اليوم الحالي أو بداية العام
+                setCurrentDate();
                 return;
             }
 
