@@ -1662,7 +1662,7 @@
                                     <span>الصف:</span>
                                     <span id="cert-student-grade">الصف الأول الإعدادي - فصل 1</span>
                                     <span>العام الدراسي:</span>
-                                    <span id="cert-academic-year">2024-2025</span>
+                                    <span id="cert-academic-year">2025-2026</span>
                                 </div>
                                 <div class="certificate-row">
                                     <span>تاريخ الميلاد:</span>
@@ -2692,18 +2692,25 @@ function updateClassFilter() {
         function updateAttendanceTable() {
             const tbody = document.getElementById('attendance-table-body');
             const dateStr = document.getElementById('attendance-date').value;
+            
+            // تحويل التواريخ إلى كائنات Date
             const date = new Date(dateStr);
-            
-            // تحويل التواريخ إلى كائنات Date مع ضبط الوقت إلى منتصف الليل
             const start = new Date(settings.academicStart);
-            start.setHours(0, 0, 0, 0);
-            
             const endAcademic = new Date(settings.academicEnd);
-            endAcademic.setHours(23, 59, 59, 999);
-            
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            date.setHours(0, 0, 0, 0);
+            
+            // نسخ التواريخ وضبطها للمقارنة
+            const compareDate = new Date(date);
+            compareDate.setHours(0, 0, 0, 0);
+            
+            const compareStart = new Date(start);
+            compareStart.setHours(0, 0, 0, 0);
+            
+            const compareEnd = new Date(endAcademic);
+            compareEnd.setHours(23, 59, 59, 999);
+            
+            const compareToday = new Date(today);
+            compareToday.setHours(23, 59, 59, 999);
             
             // إذا كان التاريخ غير صالح أو فارغ
             if (isNaN(date.getTime())) {
@@ -2715,10 +2722,24 @@ function updateClassFilter() {
                 document.getElementById('daily-percentage').textContent = '0%';
                 return;
             }
-            
+
             // التحقق من أن التاريخ في نطاق العام الدراسي
-            if (date < start || date > endAcademic) {
-                document.getElementById('attendance-title').textContent = `التاريخ خارج نطاق العام الدراسي (${settings.academicStart} إلى ${settings.academicEnd})`;
+            if (compareDate < compareStart || compareDate > compareEnd) {
+                const formattedStart = settings.academicStart.split('-').reverse().join('/');
+                const formattedEnd = settings.academicEnd.split('-').reverse().join('/');
+                document.getElementById('attendance-title').textContent = 
+                    `التاريخ خارج نطاق العام الدراسي (${formattedStart} إلى ${formattedEnd})`;
+                tbody.innerHTML = '';
+                document.getElementById('daily-present').textContent = 0;
+                document.getElementById('daily-absent').textContent = 0;
+                document.getElementById('daily-total').textContent = 0;
+                document.getElementById('daily-percentage').textContent = '0%';
+                return;
+            }
+
+            // منع تسجيل الحضور في المستقبل
+            if (compareDate > compareToday) {
+                document.getElementById('attendance-title').textContent = 'لا يمكن تسجيل الحضور في تاريخ مستقبلي';
                 tbody.innerHTML = '';
                 document.getElementById('daily-present').textContent = 0;
                 document.getElementById('daily-absent').textContent = 0;
