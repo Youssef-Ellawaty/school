@@ -2077,6 +2077,12 @@
                 attendanceData = data.attendanceData || {};
                 graduatedStudents = data.graduatedStudents || [];
             }
+            
+            // تعيين قيم التواريخ في نموذج الإعدادات
+            const academicStartField = document.getElementById('academic-start');
+            const academicEndField = document.getElementById('academic-end');
+            if (academicStartField) academicStartField.value = settings.academicStart;
+            if (academicEndField) academicEndField.value = settings.academicEnd;
         }
         
         // Tab navigation
@@ -2674,10 +2680,18 @@ function updateClassFilter() {
             const tbody = document.getElementById('attendance-table-body');
             const dateStr = document.getElementById('attendance-date').value;
             const date = new Date(dateStr);
-            // Enforce date within academic year using Date objects
+            
+            // تحويل التواريخ إلى كائنات Date مع ضبط الوقت إلى منتصف الليل
             const start = new Date(settings.academicStart);
+            start.setHours(0, 0, 0, 0);
+            
             const endAcademic = new Date(settings.academicEnd);
+            endAcademic.setHours(23, 59, 59, 999);
+            
             const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            date.setHours(0, 0, 0, 0);
+            
             // إذا كان التاريخ غير صالح أو فارغ
             if (isNaN(date.getTime())) {
                 document.getElementById('attendance-title').textContent = 'يرجى اختيار تاريخ صحيح';
@@ -2688,8 +2702,10 @@ function updateClassFilter() {
                 document.getElementById('daily-percentage').textContent = '0%';
                 return;
             }
+            
+            // التحقق من أن التاريخ في نطاق العام الدراسي
             if (date < start || date > endAcademic) {
-                document.getElementById('attendance-title').textContent = 'التاريخ خارج نطاق العام الدراسي المحدد';
+                document.getElementById('attendance-title').textContent = `التاريخ خارج نطاق العام الدراسي (${settings.academicStart} إلى ${settings.academicEnd})`;
                 tbody.innerHTML = '';
                 document.getElementById('daily-present').textContent = 0;
                 document.getElementById('daily-absent').textContent = 0;
