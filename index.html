@@ -2011,8 +2011,8 @@
         ];
 
         let settings = {
-            academicStart: '2024-09-01',
-            academicEnd: '2025-06-30',
+            academicStart: '2025-09-01',
+            academicEnd: '2026-05-31',
             currentTheme: 'dark'
         };
 
@@ -2660,8 +2660,21 @@ function updateClassFilter() {
 
         // Attendance functions
         function setCurrentDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('attendance-date').value = today;
+            const today = new Date();
+            const start = new Date(settings.academicStart);
+            const end = new Date(settings.academicEnd);
+            
+            // تعيين التاريخ الأقرب ضمن العام الدراسي
+            let targetDate;
+            if (today < start) {
+                targetDate = start;
+            } else if (today > end) {
+                targetDate = end;
+            } else {
+                targetDate = today;
+            }
+            
+            document.getElementById('attendance-date').value = targetDate.toISOString().split('T')[0];
             loadAttendanceForDate();
         }
 
@@ -3517,15 +3530,40 @@ function updateCertificateClasses() {
 
         // Settings functions
         function saveAcademicYear() {
-            settings.academicStart = document.getElementById('academic-start').value;
-            settings.academicEnd = document.getElementById('academic-end').value;
+            const newStart = document.getElementById('academic-start').value;
+            const newEnd = document.getElementById('academic-end').value;
+            
+            // التحقق من صحة التواريخ
+            const startDate = new Date(newStart);
+            const endDate = new Date(newEnd);
+            
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                showToast('تاريخ غير صالح', 'error');
+                return;
+            }
+            
+            if (endDate <= startDate) {
+                showToast('يجب أن يكون تاريخ النهاية بعد تاريخ البداية', 'error');
+                return;
+            }
+            
+            settings.academicStart = newStart;
+            settings.academicEnd = newEnd;
             saveData();
-            showToast('تم حفظ إعدادات العام الدراسي', 'success');
+            
             // تحديث جميع عناصر العام الدراسي تلقائياً
             const academicYear = `${settings.academicStart.split('-')[0]}-${settings.academicEnd.split('-')[0]}`;
             document.querySelectorAll('[id$="academic-year"]').forEach(function(el) {
                 el.textContent = academicYear;
             });
+            
+            // تحديث تاريخ الحضور إذا كان خارج النطاق الجديد
+            const attendanceDate = new Date(document.getElementById('attendance-date').value);
+            if (attendanceDate < startDate || attendanceDate > endDate) {
+                setCurrentDate();
+            }
+            
+            showToast('تم حفظ إعدادات العام الدراسي', 'success');
             // refresh move-student selector
             populateMoveStudentSelector();
         }
